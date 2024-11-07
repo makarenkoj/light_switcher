@@ -15,3 +15,7 @@ For start application:
 * run this command in terminal and follow further instructions:
 
     ` node telegram.js `
+
+Documentation Smart Home: [link](https://developer.tuya.com/en/docs/cloud/device-control?id=K95zu01ksols7)
+
+Projects and enviroment [link](https://platform.tuya.com/cloud/)

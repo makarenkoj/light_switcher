@@ -10,13 +10,22 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "astronomy-engine": "^2.1.19",
     "axios": "^1.7.7",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
     "input": "^1.0.1",
+    "luxon": "^3.5.0",
+    "moment": "^2.30.1",
+    "moment-timezone": "^0.5.46",
     "node-telegram-bot-api": "^0.66.0",
+    "qs": "^6.13.0",
+    "suncalc": "^1.9.0",
+    "sunrise-sunset-js": "^2.2.1",
     "telegraf": "^4.16.3",
     "telegram": "^2.25.11",
+    "tuyacloudnodejs": "^1.1.0",
     "tuyapi": "github:codetheweb/tuyapi"
   }
 }

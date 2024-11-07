@@ -1,34 +1,132 @@
 require('dotenv').config()
 const { TelegramClient } = require("telegram");
 const { StringSession } = require("telegram/sessions");
-const input = require("input"); // npm i input
-const TuyaDevice = require('tuyapi');
+const input = require("input");
+const crypto = require('crypto');
+const fetch = require('node-fetch');
+const { DateTime } = require('luxon');
+const SunCalc = require('suncalc');
 
-const {API_ID, API_HASH, PHONE, PASSWORD, DEVICE_ID, KEY_ID} = process.env
+const {API_ID, API_HASH, ACCESS_ID, ACCESS_SECRET, PHONE, DEVICE_ID, INFO_CHANEL_NAME, LATITUDE, LONGITUDE} = process.env
 const apiId = API_ID;
 const apiHash = API_HASH;
 const stringSession = new StringSession("");
+const signMethod = "HMAC-SHA256";
+let currentDate = DateTime.now().setZone("Europe/Kiev")
 
-// Налаштування Tuya(SmartLife)
-const lightDevice = new TuyaDevice({
-  id: DEVICE_ID,         //ID пристрою
-  key: KEY_ID,       //ключ пристрою
-  // ip: 'your-device-ip',         //IP-адресa пристрою optional
-});
+let alarmState = false, 
+    electricityState = true;
 
-const manageLight = (alarm, electricity) => {
-  if (!alarm && electricity) {
-    console.log('Умови позитивні: вмикаємо світло.');
-    lightDevice.set({ set: true });
-  } else {
-    console.log('Умови негативні: вимикаємо світло.');
-    lightDevice.set({ set: false });
+// Function to generate HMAC-SHA256 signature
+function signHMAC(message, secretKey) {
+  const hmac = crypto.createHmac('sha256', secretKey);
+  hmac.update(message);
+  return hmac.digest('hex');
+}
+
+// Function to create SHA256 hash
+function sha256(message) {
+  const hash = crypto.createHash('sha256');
+  hash.update(message);
+  return hash.digest("hex");
+}
+
+// Function to get access token and control device
+async function controlDevice(status) {
+  const t = Date.now().toString();
+  const clientId = ACCESS_ID;
+  const secretKey = ACCESS_SECRET;
+
+  // Step 1: Generate token request signature
+  const message = clientId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
+  const signature = signHMAC(message, secretKey).toUpperCase();
+  const url = "https://openapi.tuyaeu.com/v1.0/token?grant_type=1";
+  const headers = {
+      "client_id": clientId,
+      "sign": signature,
+      "t": t,
+      "sign_method": signMethod
+  };
+
+  try {
+      const tokenResponse = await fetch(url, { method: "GET", headers });
+      const tokenData = await tokenResponse.json();
+
+      if (!tokenData.result || !tokenData.result.access_token) {
+          throw new Error("Failed to get access token.");
+      };
+
+      const accessToken = tokenData.result.access_token;
+
+      // Step 2: Device control request
+      const body = {"commands": [{ "code": "switch_1", "value": status }]};
+      const bodyHash = sha256(JSON.stringify(body));
+      const controlMessage = `${clientId}${accessToken}${t}POST\n${bodyHash}\n\n/v1.0/devices/${DEVICE_ID}/commands`;
+      const controlSignature = signHMAC(controlMessage, secretKey).toUpperCase();
+      const controlUrl = `https://openapi.tuyaeu.com/v1.0/devices/${DEVICE_ID}/commands`;
+
+      const controlHeaders = {
+          "client_id": clientId,
+          "access_token": accessToken,
+          "sign": controlSignature,
+          "t": t,
+          "sign_method": signMethod,
+          "Content-Type": "application/json"
+      };
+
+      const controlResponse = await fetch(controlUrl, {
+          method: "POST",
+          headers: controlHeaders,
+          body: JSON.stringify(body)
+      });
+
+      const controlData = await controlResponse.json();
+      console.log("Device control response:", controlData);
+
+  } catch (error) {
+      console.error("Error during device control:", error);
   }
 };
 
-let alarmState = true, 
-    electricityState = true;
+function isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date = new Date()) {
+  // Розраховуємо час сходу та заходу сонця
+  const times = SunCalc.getTimes(date, latitude, longitude);
+  const sunrise = DateTime.fromJSDate(times.sunrise);
+  const sunset = DateTime.fromJSDate(times.sunset);
 
+  // Отримуємо поточний час у часовому поясі, відповідному до координат
+  const now = DateTime.now().setZone(sunrise.zoneName);
+
+  console.log(`Date now: ${now}\nToday sunrise: ${sunrise}\nToday sunset: ${sunset}`);
+
+  // Перевіряємо умови
+  const isAfterSunset = now > sunset.plus({ minutes: 20 });
+  const isBeforeSunrise = now < sunrise.plus({ minutes: 20 });
+
+  console.log(`Is after sunset: ${isAfterSunset}\nIs before sunrise: ${isBeforeSunrise}`)
+  return isAfterSunset && !isBeforeSunrise;
+};
+
+// Run the function device control
+const manageLight = (alarm, electricity, latitude, longitude, date) => {
+  if (!alarm && electricity && isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date)) {
+    console.log('Alarm:', !alarm);
+    console.log('Power:', electricity);
+    console.log('Suntime:', isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date));
+    console.log('Умови позитивні: вмикаємо світло.');
+    controlDevice(true);
+    return true
+  } else {
+    console.log('Alarm:', !alarm);
+    console.log('Power:', electricity);
+    console.log('Suntime:', isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date));
+    console.log('Умови негативні: вимикаємо світло.');
+    controlDevice(false);
+    return false
+  }
+};
+
+// Run telegram 
 (async () => {
   console.log("Loading interactive example...");
   const client = new TelegramClient(stringSession, apiId, apiHash, {
@@ -66,32 +164,31 @@ let alarmState = true,
         const message = update.message.message;
         const chanelId = update.message?.peerId?.channelId;
 
-        console.log(update);
         console.log(`Chanel id: ${chanelId}/ Borik id: ${borik_chat_id}/ Power id: ${power_chat_id}`);
-        console.log(chanelId == borik_chat_id || chanelId == power_chat_id ? true : false);
+        console.log(chanelId == borik_chat_id || chanelId == power_chat_id ? update : 'Not info chanel!');
 
-        if (message.includes('🔴 Київська область - повітряна тривога!')) {
-            console.log('Отримано тривогу! Вимикаємо світло.');
+        if (message?.includes('🔴')) {
+            console.log(`${message} \n Chanel id: ${chanelId} \n Отримано тривогу!`);
             alarmState = true;
-            client.sendMessage("raketayyy", { message: `${message} \n Chanel id: ${chanelId} \n Отримано тривогу! Вимикаємо світло.`});
-            manageLight(alarmState, electricityState);
-        } else if (message.includes('🟢 Київська область - відбій повітряної тривоги!')) {
-            console.log('Відбій тривоги! Вмикаємо світло.');
+            client.sendMessage(INFO_CHANEL_NAME, { message: 'Отримано тривогу!'});
+            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
+        } else if (message?.includes('🟢')) {
+            console.log(`${message} \n Chanel id: ${chanelId} \n Відбій тривоги!`);
             alarmState = false;
-            client.sendMessage("raketayyy", { message: `${message} \n Chanel id: ${chanelId} \n Відбій тривоги! Вмикаємо світло.`});
-            manageLight(alarmState, electricityState);
+            client.sendMessage(INFO_CHANEL_NAME, { message: 'Відбій тривоги!'})
+            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
         }
 
-        if (message.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
-          console.log('Cвітла нема! Вимикаємо світло.');
+        if (message?.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
+          console.log(`${message} \n Chanel id: ${chanelId} \n Cвітла нема!`);
           electricityState = false;
-          client.sendMessage("raketayyy", { message: `${message} \n Chanel id: ${chanelId} \n Cвітла нема! Вимикаємо світло.`});
-          manageLight(alarmState, electricityState);
-        } else if (message.includes('🟣 Щасливе (Лесі Українки, 14)')) {
-          console.log('Cвітло є! Вмикаємо світло.');
+          client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітла нема!'});
+          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate)  ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
+        } else if (message?.includes('🟣 Щасливе (Лесі Українки, 14)')) {
+          console.log(`${message} \n Chanel id: ${chanelId} \n Cвітло є!`);
           electricityState = true;
-          client.sendMessage("raketayyy", { message: `${message} \n Chanel id: ${chanelId} \n Cвітло є! Вмикаємо світло.`});
-          manageLight(alarmState, electricityState);
+          client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітло є!'});
+          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
         }
     }
   });
