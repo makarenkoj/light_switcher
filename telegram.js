@@ -1,7 +1,7 @@
 require('dotenv').config()
-const { TelegramClient } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const input = require("input");
+const { TelegramClient } = require('telegram');
+const { StringSession } = require('telegram/sessions');
+const input = require('input');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { DateTime } = require('luxon');
@@ -141,12 +141,11 @@ const manageLight = (alarm, electricity, latitude, longitude, date) => {
       await input.text("Будь ласка, введіть код, який ви отримали: "),
     onError: (err) => console.log(err),
   });
-  console.log("You should now be connected.");
+  // console.log("You should now be connected.");
   console.log('Успішно увійшли в систему!');
   console.log(client.session.save()); // Save this string to avoid logging in again
-  await client.sendMessage("me", { message: "Hello!" });
-  await client.sendMessage("raketayyy", { message: 'Hello Chanel' });
-  await client.sendMessage("+393519629923", { message: 'Hello Chanel' });
+  await client.sendMessage("me", { message: "Hello! Script is started!" });
+  await client.sendMessage(INFO_CHANEL_NAME, { message: 'Hello Chanel' });
 
   const chat = await client.getEntity('@borik_officially'),
         borik_chat_id = chat.id?.value;
@@ -167,24 +166,24 @@ const manageLight = (alarm, electricity, latitude, longitude, date) => {
         console.log(`Chanel id: ${chanelId}/ Borik id: ${borik_chat_id}/ Power id: ${power_chat_id}`);
         console.log(chanelId == borik_chat_id || chanelId == power_chat_id ? update : 'Not info chanel!');
 
-        if (message?.includes('🔴')) {
+        if (chanelId == borik_chat_id && message?.includes('🔴')) {
             console.log(`${message} \n Chanel id: ${chanelId} \n Отримано тривогу!`);
             alarmState = true;
             client.sendMessage(INFO_CHANEL_NAME, { message: 'Отримано тривогу!'});
             manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
-        } else if (message?.includes('🟢')) {
+        } else if (chanelId == borik_chat_id && message?.includes('🟢')) {
             console.log(`${message} \n Chanel id: ${chanelId} \n Відбій тривоги!`);
             alarmState = false;
             client.sendMessage(INFO_CHANEL_NAME, { message: 'Відбій тривоги!'})
             manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
         }
 
-        if (message?.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
+        if (chanelId == power_chat_id && message?.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
           console.log(`${message} \n Chanel id: ${chanelId} \n Cвітла нема!`);
           electricityState = false;
           client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітла нема!'});
           manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate)  ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
-        } else if (message?.includes('🟣 Щасливе (Лесі Українки, 14)')) {
+        } else if (chanelId == power_chat_id && message?.includes('🟣 Щасливе (Лесі Українки, 14)')) {
           console.log(`${message} \n Chanel id: ${chanelId} \n Cвітло є!`);
           electricityState = true;
           client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітло є!'});
