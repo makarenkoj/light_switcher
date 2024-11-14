@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Bot Control</title>
+</head>
+<body>
+    <!-- <h1>Управління Telegram Ботом</h1>
+
+    <button id="startButton">Запустити скрипт</button>
+    <button id="stopButton">Зупинити скрипт</button>
+
+    <div id="params" style="display: none;">
+        <label for="smsCode">Код із SMS:</label>
+        <input type="text" id="smsCode" placeholder="Введіть код із SMS">
+        <br>
+
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" placeholder="Введіть пароль">
+        <br><br>
+
+        <button id="sendParams">Надіслати параметри</button>
+    </div>
+
+    <p id="status">Статус: <span id="scriptStatus">Не запущено</span></p>
+
+    <script>
+        async function updateStatus() {
+            const response = await fetch('/status');
+            const result = await response.json();
+            document.getElementById('scriptStatus').textContent = result.status ? 'Запущено' : 'Не запущено';
+            document.getElementById('params').style.display = result.waitingForParams ? 'block' : 'none';
+        }
+
+        document.getElementById('startButton').addEventListener('click', async () => {
+            const response = await fetch('/start', { method: 'POST' });
+            const result = await response.json();
+            alert(result.message);
+            updateStatus();
+        });
+
+        document.getElementById('stopButton').addEventListener('click', async () => {
+            const response = await fetch('/stop', { method: 'POST' });
+            const result = await response.json();
+            alert(result.message);
+            updateStatus();
+        });
+
+        document.getElementById('sendParams').addEventListener('click', async () => {
+            const smsCode = document.getElementById('smsCode').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/send-params', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ smsCode, password })
+            });
+            const result = await response.json();
+            alert(result.message);
+            updateStatus();
+        });
+
+        setInterval(updateStatus, 5000);
+        updateStatus();
+    </script> -->
+
+    <h1>Telegram Авторизація</h1>
+    <form id="authForm">
+        <label for="smsCode">Код з SMS:</label>
+        <input type="text" id="smsCode" name="smsCode" required>
+        <br>
+        <label for="password">Пароль:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <button type="button" onclick="sendAuthData()">Відправити</button>
+    </form>
+
+    <script>
+        async function sendAuthData() {
+            const smsCode = document.getElementById('smsCode').value;
+            const password = document.getElementById('password').value;
+            
+            const response = await fetch('/auth', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ smsCode, password })
+            });
+
+            if (response.ok) {
+                alert("Дані надіслано успішно");
+            } else {
+                alert("Помилка під час надсилання даних");
+            }
+        }
+    </script>
+</body>
+</html>

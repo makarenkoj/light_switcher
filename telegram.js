@@ -145,8 +145,7 @@ const manageLight = (alarm, electricity, latitude, longitude, date) => {
   console.log('Успішно увійшли в систему!');
   console.log(client.session.save()); // Save this string to avoid logging in again
   await client.sendMessage("me", { message: "Hello!" });
-  await client.sendMessage("raketayyy", { message: 'Hello Chanel' });
-  await client.sendMessage("+393519629923", { message: 'Hello Chanel' });
+  await client.sendMessage(INFO_CHANEL_NAME, { message: 'Hello Chanel' });
 
   const chat = await client.getEntity('@borik_officially'),
         borik_chat_id = chat.id?.value;
