@@ -6,16 +6,67 @@ const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { DateTime } = require('luxon');
 const SunCalc = require('suncalc');
-
-const {API_ID, API_HASH, ACCESS_ID, ACCESS_SECRET, PHONE, DEVICE_ID, INFO_CHANEL_NAME, LATITUDE, LONGITUDE} = process.env
+const path = require("path");
+const express = require("express");
+const bodyParser = require("body-parser");
+const app = express();
+const {API_ID, API_HASH, ACCESS_ID, ACCESS_SECRET, PASSWORD, PHONE, DEVICE_ID, INFO_CHANEL_NAME, LATITUDE, LONGITUDE} = process.env
 const apiId = API_ID;
 const apiHash = API_HASH;
 const stringSession = new StringSession("");
 const signMethod = "HMAC-SHA256";
+const PORT = process.env.PORT || 3000;
+
 let currentDate = DateTime.now().setZone("Europe/Kiev")
 
 let alarmState = false, 
     electricityState = true;
+
+app.use(bodyParser.json());
+
+// Додаємо статичну папку
+app.use(express.static(path.join(__dirname, "public")));
+
+// Віддаємо HTML-файл за замовчуванням
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// Запуск сервера
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+
+let status = false;
+
+// check status
+app.get('/status', (req, res) => {
+  res.json({ status: status, body: {
+                                    power: electricityState,
+                                    alarm: alarmState, 
+                                    sunset: isTimeAfterSunsetOrBeforeSunrise(LATITUDE, LONGITUDE, currentDate,),
+                                    lamp: manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status)
+                                    } });
+});
+
+// chenge status
+// start
+app.post('/start', (req, res) => {
+  if (status) {
+      return res.json({ message: 'Скрипт вже запущений.' });
+  } else {
+      status = true;
+      return res.json({ message: 'Скрипт запущено.' });
+  };
+});
+
+// stop
+app.post('/stop', (req, res) => {
+  if (status) {
+      status = false;
+      res.json({ message: 'Скрипт зупинено!' });
+  } else {
+      res.json({ message: 'Скрипт не запущений.' });
+  };
+});
 
 // Function to generate HMAC-SHA256 signature
 function signHMAC(message, secretKey) {
@@ -108,8 +159,8 @@ function isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date = new Date()
 };
 
 // Run the function device control
-const manageLight = (alarm, electricity, latitude, longitude, date) => {
-  if (!alarm && electricity && isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date)) {
+const manageLight = (alarm, electricity, latitude, longitude, date, status) => {
+  if (!alarm && electricity && isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date) && status) {
     console.log('Alarm:', !alarm);
     console.log('Power:', electricity);
     console.log('Suntime:', isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date));
@@ -147,6 +198,9 @@ const manageLight = (alarm, electricity, latitude, longitude, date) => {
   await client.sendMessage("me", { message: "Hello!" });
   await client.sendMessage(INFO_CHANEL_NAME, { message: 'Hello Chanel' });
 
+  status = true;
+  console.log('STATUS:', status);
+
   const chat = await client.getEntity('@borik_officially'),
         borik_chat_id = chat.id?.value;
   console.log('Отримали чат:', chat);
@@ -165,29 +219,34 @@ const manageLight = (alarm, electricity, latitude, longitude, date) => {
 
         console.log(`Chanel id: ${chanelId}/ Borik id: ${borik_chat_id}/ Power id: ${power_chat_id}`);
         console.log(chanelId == borik_chat_id || chanelId == power_chat_id ? update : 'Not info chanel!');
+        console.log('STATUS:', status);
 
         if (message?.includes('🔴')) {
             console.log(`${message} \n Chanel id: ${chanelId} \n Отримано тривогу!`);
             alarmState = true;
             client.sendMessage(INFO_CHANEL_NAME, { message: 'Отримано тривогу!'});
-            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
+            console.log('STATUS:', status);
+            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
         } else if (message?.includes('🟢')) {
             console.log(`${message} \n Chanel id: ${chanelId} \n Відбій тривоги!`);
             alarmState = false;
             client.sendMessage(INFO_CHANEL_NAME, { message: 'Відбій тривоги!'})
-            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
+            console.log('STATUS:', status);
+            manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
         }
 
         if (message?.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
           console.log(`${message} \n Chanel id: ${chanelId} \n Cвітла нема!`);
           electricityState = false;
           client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітла нема!'});
-          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate)  ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
+          console.log('STATUS:', status);
+          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status)  ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
         } else if (message?.includes('🟣 Щасливе (Лесі Українки, 14)')) {
           console.log(`${message} \n Chanel id: ${chanelId} \n Cвітло є!`);
           electricityState = true;
           client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітло є!'});
-          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
+          console.log('STATUS:', status);
+          manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
         }
     }
   });

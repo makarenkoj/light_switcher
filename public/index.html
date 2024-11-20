@@ -1,44 +1,159 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Bot Control</title>
-</head>
-<body>
-    <!-- <h1>Управління Telegram Ботом</h1>
-
-    <button id="startButton">Запустити скрипт</button>
-    <button id="stopButton">Зупинити скрипт</button>
-
-    <div id="params" style="display: none;">
-        <label for="smsCode">Код із SMS:</label>
-        <input type="text" id="smsCode" placeholder="Введіть код із SMS">
-        <br>
-
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" placeholder="Введіть пароль">
-        <br><br>
-
-        <button id="sendParams">Надіслати параметри</button>
-    </div>
-
-    <p id="status">Статус: <span id="scriptStatus">Не запущено</span></p>
-
-    <script>
-        async function updateStatus() {
-            const response = await fetch('/status');
-            const result = await response.json();
-            document.getElementById('scriptStatus').textContent = result.status ? 'Запущено' : 'Не запущено';
-            document.getElementById('params').style.display = result.waitingForParams ? 'block' : 'none';
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Light Svitcher</title>
+  <style>
+      * {
+            box-sizing: border-box;
         }
 
-        document.getElementById('startButton').addEventListener('click', async () => {
-            const response = await fetch('/start', { method: 'POST' });
-            const result = await response.json();
-            alert(result.message);
-            updateStatus();
-        });
+      html {
+          min-height: 100vh;
+      }
+
+      body {
+        min-height: 100%;
+        background: linear-gradient(
+          19deg,
+          #292c30,
+          #005066,
+          #00787d,
+          #009e65,
+          #3abe00
+        );
+      }
+
+      .container {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container .service {
+        background: #F5F5F5 no-repeat 10px 15px;
+        border: 1px solid #C0C0C0;
+        color: #404040;
+        padding: 10px 100px 10px 100px;
+        margin: 50px 0;
+        -moz-border-radius: 10px;
+        -webkit-border-radius: 10px;
+        border-radius: 10px;
+        -moz-box-shadow: 3px 3px 6px 0 #A9A9A9;
+        -webkit-box-shadow: 3px 3px 6px #A9A9A9;
+        box-shadow: 3px 3px 6px 0 #A9A9A9;
+      }
+
+      .container .service .center {
+        max-width: 50%;
+      }
+
+      .container .service .title {
+        width: 100%;
+        text-align: center;
+        font-size: 1.2em;
+        color: #fff;
+      }
+
+      .container .service .title.degraded {
+        background-color: #6f42c1;
+      }
+
+      .container .service .title.healthy {
+        background-color: #28a745;
+      }
+
+      .button {
+          position: absolute;
+          top:50%
+      }
+
+      .rounded-button {
+          border-radius: 10px;
+          border: none;
+          padding: 15px 30px;
+          cursor: pointer;
+          font-size: 16px;
+          font-weight: bold;
+          transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .green {
+          background-color: #4CAF50;
+          color: white;
+        }
+
+        .red {
+          background-color: #f44336;
+          color: white;
+        }
+
+        .rounded-button:hover {
+          background-color: darken(#4CAF50, 10%); /* For green button */
+          background-color: darken(#f44336, 10%); /* For red button */
+          box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        
+    </style>
+</head>
+<body>
+  <div class="service center">
+  <div class="title degraded">
+    Light Svitcher
+  </div>
+
+  <div class="container">
+      <!-- // status -->
+      <div class="service">
+          <p id="status">Статус: <span id="scriptStatus">Не запущено 🔴</span></p>
+          <p>Eлектропостачання: <span id="power">Увімкнено🔋</span></p>
+          <p>Повітряна тривога: <span id="alarm">Bідсутня🌤️</span></p>
+          <p>Лампа: <span id="lamp">Bимкнено</span></p>
+          <p><span id="day">День🌞</span></p>
+      </div>
+
+      <div class="buttons">
+          <!-- chenge status -->
+          <button class="rounded-button green" id="startButton" style="display: block;">Запустити скрипт</button>
+          <button class="rounded-button red" id="stopButton" style="display: none;">Зупинити скрипт</button>
+      </div>
+  </div>
+</div>
+  <script>
+    // get status
+    async function updateStatus() {
+        const response = await fetch('/status');
+        console.log('STATUS RESPONSE:', response);
+
+        const result = await response.json(); 
+        console.log('STATUS RESULT:', result);
+        console.log('POWER:', result.body.power);
+        console.log('ALARM:', result.body.alarm);
+
+        document.getElementById('scriptStatus').textContent = result.status ? 'Запущено 🟢' : 'Не запущено 🔴';
+        document.getElementById('stopButton').style.display = result.status ? 'block' : 'none';
+        document.getElementById('startButton').style.display = result.status ? 'none' : 'block';
+        document.getElementById('power').textContent = result.body.power ? 'Увімкнено🔋' : 'Bимкнено🪫';
+        document.getElementById('alarm').textContent = result.body.alarm ? 'Увімкнено🚀' : 'Bідсутня🌤️';
+        document.getElementById('lamp').textContent = result.body.lamp ? 'Увімкнено💡' : 'Bимкнено';
+        document.getElementById('day').textContent = result.body.sunset ? 'Hіч🌌' : 'День🌞';
+        };
+
+    // start script
+    document.getElementById('startButton').addEventListener('click', async () => {
+        const response = await fetch('/start', { method: 'POST' });
+        console.log('STATUS START RESPONSE:', response)
+
+        const result = await response.json();
+        console.log('STATUS START RESULT:', result);
+
+        alert(result.message);
+        updateStatus();
+    });
 
         document.getElementById('stopButton').addEventListener('click', async () => {
             const response = await fetch('/stop', { method: 'POST' });
@@ -47,54 +162,8 @@
             updateStatus();
         });
 
-        document.getElementById('sendParams').addEventListener('click', async () => {
-            const smsCode = document.getElementById('smsCode').value;
-            const password = document.getElementById('password').value;
-
-            const response = await fetch('/send-params', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ smsCode, password })
-            });
-            const result = await response.json();
-            alert(result.message);
-            updateStatus();
-        });
-
-        setInterval(updateStatus, 5000);
-        updateStatus();
-    </script> -->
-
-    <h1>Telegram Авторизація</h1>
-    <form id="authForm">
-        <label for="smsCode">Код з SMS:</label>
-        <input type="text" id="smsCode" name="smsCode" required>
-        <br>
-        <label for="password">Пароль:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <button type="button" onclick="sendAuthData()">Відправити</button>
-    </form>
-
-    <script>
-        async function sendAuthData() {
-            const smsCode = document.getElementById('smsCode').value;
-            const password = document.getElementById('password').value;
-            
-            const response = await fetch('/auth', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ smsCode, password })
-            });
-
-            if (response.ok) {
-                alert("Дані надіслано успішно");
-            } else {
-                alert("Помилка під час надсилання даних");
-            }
-        }
-    </script>
+    setInterval(updateStatus, 5000);
+    updateStatus();
+  </script>
 </body>
 </html>
