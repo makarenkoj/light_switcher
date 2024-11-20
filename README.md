@@ -16,6 +16,10 @@ For start application:
 
     ` node telegram.js `
 
+* follow the instructions in yours cli
+
+* go to http://localhost:3000/
+
 Documentation Smart Home: [link](https://developer.tuya.com/en/docs/cloud/device-control?id=K95zu01ksols7)
 
 Projects and enviroment [link](https://platform.tuya.com/cloud/)

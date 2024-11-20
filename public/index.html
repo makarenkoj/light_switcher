@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Light Svitcher</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="service center">
+            <div class="title degraded">
+                Light Svitcher
+            </div>
+            <div class="container">
+                <!-- // status -->
+                <div class="service">
+                    <p id="status">Статус: <span id="scriptStatus">Не запущено 🔴</span></p>
+                    <p>Eлектропостачання: <span id="power">Увімкнено🔋</span></p>
+                    <p>Повітряна тривога: <span id="alarm">Bідсутня🌤️</span></p>
+                    <p>Лампа: <span id="lamp">Bимкнено</span></p>
+                    <p><span id="day">День🌞</span></p>
+                </div>
+                <div class="buttons">
+                    <!-- chenge status -->
+                    <button class="rounded-button green" id="startButton" style="display: block;">Запустити скрипт</button>
+                    <button class="rounded-button red" id="stopButton" style="display: none;">Зупинити скрипт</button>
+                </div>
+            </div>
+        </div>
+        <script src="/js/script.js"></script>
+    </body>
+</html>
