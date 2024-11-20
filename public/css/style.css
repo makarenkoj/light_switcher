@@ -3,89 +3,89 @@
 }
 
 html {
-min-height: 100vh;
+  min-height: 100vh;
 }
 
 body {
-min-height: 100%;
-background: linear-gradient(
-19deg,
-#292c30,
-#005066,
-#00787d,
-#009e65,
-#3abe00
-);
+  min-height: 100%;
+  background: linear-gradient(
+              19deg,
+              #292c30,
+              #005066,
+              #00787d,
+              #009e65,
+              #3abe00
+              );
 }
 
 .container {
-display: flex;
-flex-direction: column;
-flex-wrap: wrap;
-justify-content: center;
-align-items: center;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
 }
 
 .container .service {
-background: #F5F5F5 no-repeat 10px 15px;
-border: 1px solid #C0C0C0;
-color: #404040;
-padding: 10px 100px 10px 100px;
-margin: 50px 0;
--moz-border-radius: 10px;
--webkit-border-radius: 10px;
-border-radius: 10px;
--moz-box-shadow: 3px 3px 6px 0 #A9A9A9;
--webkit-box-shadow: 3px 3px 6px #A9A9A9;
-box-shadow: 3px 3px 6px 0 #A9A9A9;
+  background: #F5F5F5 no-repeat 10px 15px;
+  border: 1px solid #C0C0C0;
+  color: #404040;
+  padding: 10px 100px 10px 100px;
+  margin: 50px 0;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+  border-radius: 10px;
+  -moz-box-shadow: 3px 3px 6px 0 #A9A9A9;
+  -webkit-box-shadow: 3px 3px 6px #A9A9A9;
+  box-shadow: 3px 3px 6px 0 #A9A9A9;
 }
 
 .container .service .center {
-max-width: 50%;
+  max-width: 50%;
 }
 
 .container .service .title {
-width: 100%;
-text-align: center;
-font-size: 1.2em;
-color: #fff;
+  width: 100%;
+  text-align: center;
+  font-size: 1.2em;
+  color: #fff;
 }
 
 .container .service .title.degraded {
-background-color: #6f42c1;
+  background-color: #6f42c1;
 }
 
 .container .service .title.healthy {
-background-color: #28a745;
+  background-color: #28a745;
 }
 
 .button {
-position: absolute;
-top:50%
+  position: absolute;
+  top:50%
 }
 
 .rounded-button {
-border-radius: 10px;
-border: none;
-padding: 15px 30px;
-cursor: pointer;
-font-size: 16px;
-font-weight: bold;
-transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-}
+  border-radius: 10px;
+  border: none;
+  padding: 15px 30px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
 
 .green {
-background-color: #4CAF50;
-color: white;
+  background-color: #4CAF50;
+  color: white;
 }
 
 .red {
-background-color: #f44336;
-color: white;
+  background-color: #f44336;
+  color: white;
 }
 
 .rounded-button:hover {
-background-color: darken(#4CAF50, 10%); /* For green button */
-background-color: darken(#f44336, 10%); /* For red button */
-box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
+  background-color: darken(#4CAF50, 10%); /* For green button */
+  background-color: darken(#f44336, 10%); /* For red button */
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.3);
 }
