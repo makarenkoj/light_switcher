@@ -1,7 +1,7 @@
 require('dotenv').config()
-const { TelegramClient } = require("telegram");
-const { StringSession } = require("telegram/sessions");
-const input = require("input");
+const { TelegramClient } = require('telegram');
+const { StringSession } = require('telegram/sessions');
+const input = require('input');
 const crypto = require('crypto');
 const fetch = require('node-fetch');
 const { DateTime } = require('luxon');
