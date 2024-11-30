@@ -10,10 +10,13 @@ const path = require("path");
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
+const fs = require('fs');
+
 const {API_ID, API_HASH, ACCESS_ID, ACCESS_SECRET, PASSWORD, PHONE, DEVICE_ID, INFO_CHANEL_NAME, LATITUDE, LONGITUDE} = process.env
 const apiId = API_ID;
 const apiHash = API_HASH;
-const stringSession = new StringSession("");
+const sessionFile = './session.txt';
+const stringSession = fs.existsSync(sessionFile) ? new StringSession(fs.readFileSync(sessionFile, 'utf-8')) : new StringSession('');
 const signMethod = "HMAC-SHA256";
 const PORT = process.env.PORT || 3000;
 
@@ -159,14 +162,14 @@ function isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date = new Date()
 // Run the function device control
 const manageLight = (alarm, electricity, latitude, longitude, date, status) => {
     if (!alarm && electricity && isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date) && status) {
-      console.log('Alarm:', !alarm);
+      console.log('Alarm:', alarm);
       console.log('Power:', electricity);
       console.log('Suntime:', isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date));
       console.log('Умови позитивні: вмикаємо світло.');
       controlDevice(true);
       return true
     } else {
-      console.log('Alarm:', !alarm);
+      console.log('Alarm:', alarm);
       console.log('Power:', electricity);
       console.log('Suntime:', isTimeAfterSunsetOrBeforeSunrise(latitude, longitude, date));
       console.log('Умови негативні: вимикаємо світло.');
@@ -183,24 +186,22 @@ const manageLight = (alarm, electricity, latitude, longitude, date, status) => {
     await client.start({
         // phoneNumber: async () => await input.text("Будь ласка, введіть свій номер: "),
         phoneNumber: PHONE,
-        password: async () => await input.text("Будь ласка, введіть свій пароль: "),
-        // password: PASSWORD,
-        phoneCode: async () =>
-            await input.text("Будь ласка, введіть код, який ви отримали: "),
+        // password: async () => await input.text("Будь ласка, введіть свій пароль: "),
+        password: async () => PASSWORD,
+        phoneCode: async () => await input.text("Будь ласка, введіть код, який ви отримали: "),
         onError: (err) => console.log(err),
     });
     console.log("You should now be connected.");
-    console.log('Успішно увійшли в систему!');
-    console.log(client.session.save()); // Save this string to avoid logging in again
+    console.log(fs.writeFileSync(sessionFile, client.session.save())); // Save this string to avoid logging in again
     await client.sendMessage("me", { message: "Hello!" });
     await client.sendMessage(INFO_CHANEL_NAME, { message: 'Hello Chanel' });
 
+    console.log('CONNECTED:', client.connected); //check telegram conestion
     status = true;
-    console.log('STATUS:', status);
 
-    const chat = await client.getEntity('@borik_officially'),
-          borik_chat_id = chat.id?.value;
-    console.log('Отримали чат:', chat);
+    const borik_chat = await client.getEntity('@borik_officially'),
+          borik_chat_id = borik_chat.id?.value;
+    console.log('Отримали чат:', borik_chat);
 
     const power_chat = await client.getEntity('@power_prystolychka'),
           power_chat_id = power_chat.id?.value;
@@ -216,33 +217,28 @@ const manageLight = (alarm, electricity, latitude, longitude, date, status) => {
 
             console.log(`Chanel id: ${chanelId}/ Borik id: ${borik_chat_id}/ Power id: ${power_chat_id}`);
             console.log(chanelId == borik_chat_id || chanelId == power_chat_id ? update : 'Not info chanel!');
-            console.log('STATUS:', status);
 
-            if (message?.includes('🔴')) {
+            if (message?.includes('🔴') && chanelId == borik_chat_id) {
                 console.log(`${message} \n Chanel id: ${chanelId} \n Отримано тривогу!`);
                 alarmState = true;
                 client.sendMessage(INFO_CHANEL_NAME, { message: 'Отримано тривогу!'});
-                console.log('STATUS:', status);
                 manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
-            } else if (message?.includes('🟢')) {
+            } else if (message?.includes('🟢') && chanelId == borik_chat_id) {
                 console.log(`${message} \n Chanel id: ${chanelId} \n Відбій тривоги!`);
                 alarmState = false;
                 client.sendMessage(INFO_CHANEL_NAME, { message: 'Відбій тривоги!'})
-                console.log('STATUS:', status);
                 manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
             }
 
-            if (message?.includes('⚫️ Щасливе (Лесі Українки, 14)')) {
+            if (message?.includes('⚫️ Щасливе (Лесі Українки, 14)') && chanelId == power_chat_id) {
                 console.log(`${message} \n Chanel id: ${chanelId} \n Cвітла нема!`);
                 electricityState = false;
                 client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітла нема!'});
-                console.log('STATUS:', status);
                 manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status)  ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні: вимикаємо світло.'});
-            } else if (message?.includes('🟣 Щасливе (Лесі Українки, 14)')) {
+            } else if (message?.includes('🟣 Щасливе (Лесі Українки, 14)') && chanelId == power_chat_id) {
                 console.log(`${message} \n Chanel id: ${chanelId} \n Cвітло є!`);
                 electricityState = true;
                 client.sendMessage(INFO_CHANEL_NAME, { message: 'Cвітло є!'});
-                console.log('STATUS:', status);
                 manageLight(alarmState, electricityState, LATITUDE, LONGITUDE, currentDate, status) ? client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови позитивні: вмикаємо світло.'}) : client.sendMessage(INFO_CHANEL_NAME, { message: 'Умови негативні.'});
             }
         }
