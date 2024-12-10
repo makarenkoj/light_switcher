@@ -1,5 +1,18 @@
 "use strict";
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    window.location.href = '/'
+  } else {
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('phoneCodeHash');
+    localStorage.removeItem('step');
+    localStorage.removeItem('authorized');
+  };
+});
+
 document.getElementById("sign-up-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const email = document.getElementById("email").value;

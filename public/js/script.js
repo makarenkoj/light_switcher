@@ -2,6 +2,15 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem('token');
+
+  if (!token) {
+    window.location.href = '/login'
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('phoneCodeHash');
+    localStorage.removeItem('step');
+    localStorage.removeItem('authorized');
+  };
+
   try {
     const response = await fetch("/api/telegram/checkSession", {
       method: "GET",

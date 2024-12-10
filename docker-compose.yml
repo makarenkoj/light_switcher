@@ -7,14 +7,17 @@ services:
     environment:
       - NODE_ENV=development
       - MONGO_URI=mongodb://mongo:27017/telegramdb
+      - API_ID=${API_ID}
+      - API_HASH=${API_HASH}
     depends_on:
       - mongo
+    volumes:
+      - .:/usr/src/app
   mongo:
     image: mongo:5.0
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
-      # - ./.docker/mongo:/data/db
 volumes:
   mongo-data:

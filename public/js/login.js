@@ -1,12 +1,25 @@
 "use strict";
 
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    window.location.href = '/'
+  } else {
+    localStorage.removeItem('phoneNumber');
+    localStorage.removeItem('phoneCodeHash');
+    localStorage.removeItem('step');
+    localStorage.removeItem('authorized');
+  };
+});
+
 document.getElementById("login-form").addEventListener("submit", async (e) => {
   e.preventDefault();
+
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
   try {
-    console.log(';jdjjdjdjd')
     const response = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -19,6 +32,7 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
     if (response.ok) {
       localStorage.setItem('token', data.token);
       document.getElementById("message").innerText = data.message;
+      window.location.href = '/'
     } else {
       document.getElementById("message").innerText = data.error;
       throw new Error(data.error)

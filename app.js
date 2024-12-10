@@ -25,9 +25,12 @@ const authRoutes = require('./routes/auth');
 const signUpRoutes = require('./routes/signUp');
 
 // Використання маршрутів
+// front
 app.use('/', indexRoutes);           // Головна сторінка
 app.use('/', statusRoutes);          // Сторінка статусу
 app.use('/', signUpRoutes);          // Сторінка sign upa
+
+// api
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/auth', authRoutes); // маршрути для реєстрації та логіну
 
