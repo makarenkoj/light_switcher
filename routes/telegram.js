@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const telegramController = require('../controllers/telegramController');
+const authenticateUser = require('../middleware/authMiddleware');
 
-router.post('/sendCode', telegramController.sendCode);
-router.post('/signIn', telegramController.signIn);
-router.get('/checkSession', telegramController.checkSession);
+router.post('/sendCode', authenticateUser, telegramController.sendCode);
+router.post('/signIn', authenticateUser, telegramController.signIn);
+router.get('/checkSession', authenticateUser, telegramController.checkSession);
 
 module.exports = router;

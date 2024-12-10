@@ -2,11 +2,12 @@
 
 document.addEventListener("DOMContentLoaded", async (e) => {
   e.preventDefault(); //?
+  const token = localStorage.getItem('token');
 
   try {
     const response = await fetch("/api/telegram/checkSession", {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
     });
 
     const data = await response.json();

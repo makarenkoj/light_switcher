@@ -34,6 +34,6 @@ app.use('/api/auth', authRoutes); // маршрути для реєстраці�
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
-  const { initializeClient } = require('./controllers/telegramController');
-  await initializeClient();
+  // const { initializeClient } = require('./controllers/telegramController');
+  // await initializeClient();
 });

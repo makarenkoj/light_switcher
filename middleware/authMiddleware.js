@@ -3,7 +3,8 @@ const User = require('../models/userModel');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-exports.authenticateUser = async (req, res, next) => {
+const authenticateUser = async (req, res, next) => {
+  // console.log(req.headers)
   const token = req.headers.authorization?.split(' ')[1];
   if (!token) return res.status(401).json({ error: 'Token not provided' });
 
@@ -15,3 +16,5 @@ exports.authenticateUser = async (req, res, next) => {
     res.status(401).json({ error: 'Unauthorized' });
   }
 };
+
+module.exports = authenticateUser;

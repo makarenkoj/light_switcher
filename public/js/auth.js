@@ -14,7 +14,7 @@ document.getElementById("sign-up-form").addEventListener("submit", async (e) => 
 
     const data = await response.json();
     console.log('DATA:', data);
-debugger
+
     if (response.ok) {
       localStorage.setItem('userId', data.userId);
       document.getElementById("message").innerText = data.message;

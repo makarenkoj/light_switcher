@@ -1,10 +1,13 @@
 "use strict";
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem('token');
   try {
     const response = await fetch("/api/telegram/checkSession", {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json",
+        'Authorization': `Bearer ${token}`
+       },
     });
 
     const data = await response.json();
@@ -13,7 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (response.ok) {
       localStorage.removeItem('phoneNumber');
       localStorage.removeItem('phoneCodeHash');
-      localStorage.setItem('authorized:', data.authorized);
+      localStorage.setItem('authorized', data.authorized);
 
       data.authorized === true ? window.location.href = '/status' : document.getElementById("message").innerText = 'Telegram not Authorize.\nPlease Authorize!';
     } else {
@@ -36,11 +39,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 document.getElementById("phone-form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const phoneNumber = document.getElementById("phone").value;
+  const token = localStorage.getItem('token');
 
   try {
     const response = await fetch("/api/telegram/sendCode", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ phoneNumber }),
     });
 
@@ -69,11 +73,12 @@ document.getElementById("code-form").addEventListener("submit", async (e) => {
   const code = document.getElementById("code").value;
   const phoneNumber = localStorage.getItem('phoneNumber');
   const phoneCodeHash = localStorage.getItem('phoneCodeHash');
+  const token = localStorage.getItem('token');
 
   try {
     const response = await fetch("/api/telegram/signIn", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
       body: JSON.stringify({ code, phoneNumber, phoneCodeHash, setupStep: 2 }),
     });
 
