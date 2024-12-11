@@ -17,5 +17,13 @@
     "telega": "^2.1.0",
     "telegram": "^2.26.8",
     "telegram-mtproto": "^1.0.5"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.2",
+    "supertest": "^7.0.0"
+  },
+  "scripts": {
+  "test": "jest"
   }
 }

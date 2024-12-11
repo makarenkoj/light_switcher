@@ -121,7 +121,7 @@ async function checkSession(req, res) {
     } else if (initializeClient(req.user._id)) {
       res.status(200).json({ authorized: true });
     } else {
-      res.status(401).json({ message: 'Telegram not authorize' });
+      res.status(401).json({ message: 'Telegram not authorize', authorized: false });
     };
 
   } catch (error) {

@@ -40,3 +40,5 @@ app.listen(PORT, async () => {
   // const { initializeClient } = require('./controllers/telegramController');
   // await initializeClient();
 });
+
+module.exports = app;
