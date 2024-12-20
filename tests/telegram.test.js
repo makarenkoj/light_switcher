@@ -13,7 +13,6 @@ jest.mock('telegram');
 jest.setTimeout(30000);
 
 describe('Telegram API Tests', () => {
-  
   beforeAll(async () => {
     await mongoose.connect(process.env.MONGO_URI);
     user = await User.create({
@@ -26,7 +25,11 @@ describe('Telegram API Tests', () => {
 
   afterAll(async () => {
     await User.deleteMany({});
+
+    console.log('Closing DB connection');
     await mongoose.disconnect();
+
+    console.log('Closing server');
     await server.close();
   });
 
@@ -60,5 +63,4 @@ describe('Telegram API Tests', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('authorized');
   });
-
 });

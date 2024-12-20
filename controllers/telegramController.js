@@ -53,7 +53,7 @@ async function sendCode(req, res) {
 
     res.status(200).json({ phoneCodeHash: result.phoneCodeHash, phoneNumber, message: 'Code sent successfully' });
   } catch (error) {
-    console.error('Error sending code:', error);
+    // console.error('Error sending code:', error);
     res.status(500).json({ error: 'Failed to send code' });
   }
 };
@@ -106,7 +106,7 @@ async function signIn(req, res) {
         res.status(500).json({ error: '2FA authentication failed' });
       }
     } else {
-      console.error('Sign-in Error:', error);
+      // console.error('Sign-in Error:', error);
       res.status(500).json({ error: 'Sign-in failed' });
     }
   }
