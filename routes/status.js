@@ -1,10 +1,11 @@
-const express = require('express');
+import express  from 'express';
+import { getStatus } from '../controllers/statusController.js';
+// import authenticateUser from '../middleware/authMiddleware';
+
 const router = express.Router();
-const statusController = require('../controllers/statusController');
-const authenticateUser = require('../middleware/authMiddleware');
 
 // Сторінка статусу
 // router.get('/status', authenticateUser, statusController.getStatus);
-router.get('/status', statusController.getStatus);
+router.get('/status', getStatus);
 
-module.exports = router;
+export default router;

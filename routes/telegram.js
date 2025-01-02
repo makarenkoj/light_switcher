@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import { sendCode, signIn, checkSession } from '../controllers/telegramController.js';
+import authenticateUser from '../middleware/authMiddleware.js';
+
 const router = express.Router();
-const telegramController = require('../controllers/telegramController');
-const authenticateUser = require('../middleware/authMiddleware');
 
-router.post('/sendCode', authenticateUser, telegramController.sendCode);
-router.post('/signIn', authenticateUser, telegramController.signIn);
-router.get('/checkSession', authenticateUser, telegramController.checkSession);
+router.post('/sendCode', authenticateUser, sendCode);
+router.post('/signIn', authenticateUser, signIn);
+router.get('/checkSession', authenticateUser, checkSession);
 
-module.exports = router;
+export default router;

@@ -1,10 +1,11 @@
-require('dotenv').config();
-const { Api, TelegramClient } = require('telegram');
-const { StringSession } = require('telegram/sessions');
-const Session = require('../models/sessionModel');
-const { prepareSRP } = require('../utils/srpHelper'); // Допоміжна функція SRP
-const { sendAndHandleMessages } = require('../utils/telegramUtils');
-const User = require('../models/userModel');
+import dotenv from 'dotenv';
+dotenv.config();
+import { Api, TelegramClient } from 'telegram';
+import { StringSession } from 'telegram/sessions/index.js';
+import Session from '../models/sessionModel.js';
+import { prepareSRP } from '../utils/srpHelper.js';
+import { sendAndHandleMessages } from '../utils/telegramUtils.js';
+import User from '../models/userModel.js';
 
 const apiId = parseInt(process.env.API_ID);
 const apiHash = process.env.API_HASH;
@@ -130,4 +131,4 @@ async function checkSession(req, res) {
   }
 };
 
-module.exports = { initializeClient, sendCode, signIn, checkSession };
+export { initializeClient, sendCode, signIn, checkSession };

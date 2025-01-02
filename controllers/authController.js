@@ -1,10 +1,9 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/userModel');
-const { initializeClient } = require('./telegramController');
-
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
+import { initializeClient } from './telegramController.js';
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-exports.register = async (req, res) => {
+async function register(req, res) {
   try {
     console.log(req.body)
     const { email, password } = req.body;
@@ -16,7 +15,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+async function login(req, res) {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
@@ -35,7 +34,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = async (req, res) => {
+async function logout(req, res) {
   try {
     res.status(200).json({ message: 'Logout successful' });
   } catch (error) {
@@ -43,3 +42,5 @@ exports.logout = async (req, res) => {
     res.status(500).json({ error: 'Logout failed' });
   }
 };
+
+export { register, login, logout };

@@ -1,8 +1,9 @@
-const express = require('express');
+import express  from 'express';
+import { getSignUpPage, getLoginPage } from '../controllers/signUpController.js';
+
 const router = express.Router();
-const indexController = require('../controllers/signUpController');
 
-router.get('/sign_up', indexController.getSignUpPage);
-router.get('/login', indexController.getLoginPage )
+router.get('/sign_up', getSignUpPage);
+router.get('/login', getLoginPage )
 
-module.exports = router;
+export default router;

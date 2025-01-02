@@ -16,4 +16,4 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
   }
 };
 
-module.exports = { sendAndHandleMessages };
+export{ sendAndHandleMessages };

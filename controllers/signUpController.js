@@ -1,9 +1,15 @@
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-exports.getSignUpPage = (req, res) => {
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+function getSignUpPage(req, res) {
   res.sendFile(path.join(__dirname, '../views/signup.html'));
 };
 
-exports.getLoginPage = (req, res) => {
+function getLoginPage(req, res) {
   res.sendFile(path.join(__dirname, '../views/login.html'));
 };
+
+export { getSignUpPage, getLoginPage };

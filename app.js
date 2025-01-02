@@ -1,11 +1,16 @@
-require('dotenv').config();
-const express = require('express');
-const mongoose = require('mongoose');
-const path = require('path');
-const bodyParser = require('body-parser');
+import 'dotenv/config';
+import express  from 'express';
+import mongoose  from 'mongoose';
+import path from 'path';
+import bodyParser from 'body-parser';
+import { fileURLToPath } from 'url';
+import { controlDevice } from './utils/deviceUtils.js';
 
 const app = express();
 const PORT = process.env.PORT || 0;
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(bodyParser.json());
@@ -18,11 +23,11 @@ mongoose
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Підключення маршрутів
-const indexRoutes = require('./routes/index');
-const statusRoutes = require('./routes/status');
-const telegramRoutes = require('./routes/telegram');
-const authRoutes = require('./routes/auth');
-const signUpRoutes = require('./routes/signUp');
+import indexRoutes from './routes/index.js';
+import statusRoutes from './routes/status.js';
+import telegramRoutes from './routes/telegram.js';
+import authRoutes from './routes/auth.js';
+import signUpRoutes from './routes/signUp.js';
 
 // Використання маршрутів
 // front
@@ -37,8 +42,11 @@ app.use('/api/auth', authRoutes); // маршрути для реєстраці�
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
+  console.log('\nstart device\n');
+  // await controlDevice(true);
+  console.log('\nstart success\n');
   // const { initializeClient } = require('./controllers/telegramController');
   // await initializeClient();
 });
 
-module.exports = app;
+export default app;

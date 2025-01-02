@@ -1,5 +1,5 @@
-const crypto = require('crypto');
-const { modPow } = require('bigint-mod-arith');
+import crypto from 'crypto';
+import { modPow } from 'bigint-mod-arith';
 
 // for 2FA
 async function prepareSRP(passwordInfo, password) {
@@ -41,4 +41,4 @@ async function prepareSRP(passwordInfo, password) {
   };
 }
 
-module.exports = { prepareSRP };
+export { prepareSRP };

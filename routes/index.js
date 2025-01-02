@@ -1,9 +1,10 @@
-const express = require('express');
+import express from 'express';
+import { getIndex } from '../controllers/indexController.js';
+// import authenticateUser from '../middleware/authMiddleware.js';
+
 const router = express.Router();
-const indexController = require('../controllers/indexController');
-const authenticateUser = require('../middleware/authMiddleware');
 
 // router.get('/', authenticateUser, indexController.getIndex);
-router.get('/', indexController.getIndex);
+router.get('/', getIndex);
 
-module.exports = router;
+export default router;
