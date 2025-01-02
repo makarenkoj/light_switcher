@@ -1,10 +1,12 @@
-require('dotenv').config({ path: '.env.test' });
-const { MongoMemoryServer } = require('mongodb-memory-server');
-const mongoose = require('mongoose');
+import dotenv from 'dotenv';
+dotenv.config({ path: '.env.test' });
+
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose from 'mongoose';
 
 let mongoServer;
 
-module.exports = async () => {
+export default async () => {
   if (!process.env.MONGO_URI) {
     throw new Error('MONGO_URI is not defined in the environment variables.');
   }

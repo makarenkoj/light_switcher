@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-module.exports = async () => {
+export default async () => {
   await mongoose.disconnect();
 };
