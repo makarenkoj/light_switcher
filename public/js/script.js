@@ -30,6 +30,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       data.authorized === true ? window.location.href = '/status' : document.getElementById("message").innerText = 'Telegram not Authorize.\nPlease Authorize!';
     } else {
       document.getElementById("phone-message").innerText = data.error;
+      localStorage.removeItem('authorized');
+      localStorage.removeItem('token');
+      window.location.href = '/login'
       throw new Error(data.error)
     }
 
