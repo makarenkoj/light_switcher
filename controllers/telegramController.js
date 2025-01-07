@@ -6,6 +6,7 @@ import Session from '../models/sessionModel.js';
 import { prepareSRP } from '../utils/srpHelper.js';
 import { sendAndHandleMessages } from '../utils/telegramUtils.js';
 import User from '../models/userModel.js';
+// import { message } from 'telegram-mtproto/lib/mtproto.js';
 
 const apiId = parseInt(process.env.API_ID);
 const apiHash = process.env.API_HASH;
@@ -118,9 +119,9 @@ async function checkSession(req, res) {
     const isAuthorized = await client?.isUserAuthorized();
 
     if (isAuthorized){
-      res.status(200).json({ authorized: isAuthorized });
+      res.status(200).json({ authorized: isAuthorized, message: 'Telegram authorized' });
     } else if (initializeClient(req.user._id)) {
-      res.status(200).json({ authorized: true });
+      res.status(200).json({ authorized: true, message: 'Telegram authorized' });
     } else {
       res.status(401).json({ message: 'Telegram not authorize', authorized: false });
     };

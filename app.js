@@ -4,7 +4,6 @@ import mongoose  from 'mongoose';
 import path from 'path';
 import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
-import { controlDevice } from './utils/deviceUtils.js';
 
 const app = express();
 const PORT = process.env.PORT || 0;
@@ -28,6 +27,7 @@ import statusRoutes from './routes/status.js';
 import telegramRoutes from './routes/telegram.js';
 import authRoutes from './routes/auth.js';
 import signUpRoutes from './routes/signUp.js';
+import deviceRoutes from './routes/device.js';
 
 // Використання маршрутів
 // front
@@ -38,12 +38,11 @@ app.use('/', signUpRoutes);          // Сторінка sign upa
 // api
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/auth', authRoutes); // маршрути для реєстрації та логіну
-
+app.use('/api/device', deviceRoutes); // маршрути для керування пристроєм
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log('\nstart device\n');
-  // await controlDevice(true);
   console.log('\nstart success\n');
   // const { initializeClient } = require('./controllers/telegramController');
   // await initializeClient();
