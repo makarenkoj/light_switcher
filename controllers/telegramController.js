@@ -45,7 +45,13 @@ async function initializeClient(id) {
 
 async function sendCode(req, res) {
   try {
-    const { phoneNumber } = req.body;
+    const user = await User.findById(req.user._id);
+    const phoneNumber = user.phoneNumber;
+
+    if (!phoneNumber) {
+      return res.status(422).json({ error: 'Could you please add phone number to your account!' });
+    };
+
     const result = await client.invoke(
       new Api.auth.SendCode({
         phoneNumber,
@@ -60,7 +66,6 @@ async function sendCode(req, res) {
       })
     );
 
-    const user = await User.findById(req.user._id);
     console.log('USER:', user)
 
     res.status(200).json({ phoneCodeHash: result.phoneCodeHash, phoneNumber, message: 'Code sent successfully' });
@@ -71,12 +76,29 @@ async function sendCode(req, res) {
 
 async function signIn(req, res) {
   try {
-    const { phoneNumber, phoneCodeHash, code } = req.body;
+    const user = await User.findById(req.user._id);
+    const phoneNumber = user.phoneNumber;
+    const { phoneCodeHash, code } = req.body;
+
+    if (!phoneNumber || !phoneCodeHash || !code) {
+      console.log('send:', false);
+
+      return res.status(422).json({
+        error: 'Missing required data',
+        details: {
+          phoneNumber: phoneNumber ? 'present' : 'missing',
+          phoneCodeHash: phoneCodeHash ? 'present' : 'missing',
+          code: code ? 'present' : 'missing',
+        },
+        authorized: false,
+      });
+    };
+
+    console.log('send:', true);
+
     const result = await client.invoke(
       new Api.auth.SignIn({ phoneNumber, phoneCodeHash, phoneCode: code })
     );
-
-    const user = await User.findById(req.user._id);
 
     console.log('GET CODE RESULT:', result);
 
@@ -84,9 +106,9 @@ async function signIn(req, res) {
       saveSession(user._id);
       await sendAndHandleMessages(client, INFO_CHANEL_NAME, "Hello!\n Session saved to file.", "Hello!\n Session saved to file.");
 
-      return res.status(200).json({ message: 'Sign-in successful', user: result.user });
+      return res.status(200).json({ message: 'Sign-in successful', user: result.user, authorized: true });
     } else {
-      res.status(401).json({ message: 'Sign-in failed' });
+      return res.status(401).json({ error: 'Sign-in failed', authorized: false });
     }
   } catch (error) {
     if (error.errorMessage === 'SESSION_PASSWORD_NEEDED') {
