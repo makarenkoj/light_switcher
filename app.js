@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import cors from 'cors';
 import express  from 'express';
 import mongoose  from 'mongoose';
 import path from 'path';
@@ -10,6 +11,12 @@ const PORT = process.env.PORT || 0;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Cors
+app.use(cors({
+  origin: process.env.CLIENT,
+  credentials: true,
+}));
 
 // Middleware
 app.use(bodyParser.json());

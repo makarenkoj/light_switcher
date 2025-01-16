@@ -13,10 +13,20 @@ const apiHash = process.env.API_HASH;
 const INFO_CHANEL_NAME = process.env.INFO_CHANEL_NAME;
 let client;
 
+async function saveSession(userId) {
+  const sessionString = client.session.save();
+  await Session.findOneAndUpdate(
+    { userId },
+    { session: sessionString },
+    { upsert: true }
+  );
+}
+
 async function initializeClient(id) {
   const user = await User.findById(id);
-  const savedSession = user.telegramSession;
-  const stringSession = savedSession ? new StringSession(savedSession) : new StringSession('');
+  const sessionData = await Session.findOne({ userId: user._id });
+  const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
+
   client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
   await client.connect();
   console.log('Telegram Client Initialized');
@@ -55,7 +65,6 @@ async function sendCode(req, res) {
 
     res.status(200).json({ phoneCodeHash: result.phoneCodeHash, phoneNumber, message: 'Code sent successfully' });
   } catch (error) {
-    // console.error('Error sending code:', error);
     res.status(500).json({ error: 'Failed to send code' });
   }
 };
@@ -72,10 +81,7 @@ async function signIn(req, res) {
     console.log('GET CODE RESULT:', result);
 
     if (result.className === "auth.Authorization" && result.user) {
-      const sessionString = client.session.save();
-      user.telegramSession = sessionString;
-      await user.save();
-      console.log('SESION:', sessionString)
+      saveSession(user._id);
       await sendAndHandleMessages(client, INFO_CHANEL_NAME, "Hello!\n Session saved to file.", "Hello!\n Session saved to file.");
 
       return res.status(200).json({ message: 'Sign-in successful', user: result.user });
@@ -98,9 +104,7 @@ async function signIn(req, res) {
           })
         );
 
-        const sessionString = client.session.save();
-        user.telegramSession = sessionString;
-        await user.save();
+        saveSession(user._id);
 
         res.status(200).json({ message: '2FA Sign-in successful', user: authResult.user });
       } catch (innerError) {
@@ -108,7 +112,6 @@ async function signIn(req, res) {
         res.status(500).json({ error: '2FA authentication failed' });
       }
     } else {
-      // console.error('Sign-in Error:', error);
       res.status(500).json({ error: 'Sign-in failed' });
     }
   }
@@ -117,10 +120,11 @@ async function signIn(req, res) {
 async function checkSession(req, res) {
   try {
     const isAuthorized = await client?.isUserAuthorized();
-
+    
+    console.log('isAuthorized:', isAuthorized);
     if (isAuthorized){
       res.status(200).json({ authorized: isAuthorized, message: 'Telegram authorized' });
-    } else if (initializeClient(req.user._id)) {
+    } else if (await initializeClient(req.user._id)) {
       res.status(200).json({ authorized: true, message: 'Telegram authorized' });
     } else {
       res.status(401).json({ message: 'Telegram not authorize', authorized: false });

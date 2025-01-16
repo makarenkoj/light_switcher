@@ -11,8 +11,8 @@ const userSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  telegramSession: { 
-    type: String 
+  phoneNumber: {
+    type: String
   }
 }, { timestamps: true });
 
