@@ -78,6 +78,15 @@ async function update(req, res) {
       return res.status(404).json({ error: 'User not found!' });
     };
 
+    const device = await Devices.findById(req.params.id);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found!' });
+    };
+
+    if (device.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+    };
+
     const { name, deviceId, accessId, accessSecret } = req.body;
 
     const updateFields = {};
@@ -106,7 +115,29 @@ async function update(req, res) {
   }
 };
 
-async function remove(req, res) {}
+async function remove(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found!' });
+    };
+
+    const device = await Devices.findById(req.params.id);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found!' });
+    };
+
+    if (device.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+    };
+
+    await device.deleteOne();
+    res.status(200).json({ message: 'Device deleted successfully' });
+  } catch (error) {
+    console.error('Remove Error:', error);
+    res.status(422).json({ error: 'Failed to delete device!' });
+  }
+};
 
 async function getStatus(req, res) {
   try {
