@@ -5,6 +5,7 @@ import mongoose  from 'mongoose';
 import path from 'path';
 import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
+// import { initializeClient } from './controllers/telegramController.js';
 
 const app = express();
 const PORT = process.env.PORT || 0;
@@ -45,14 +46,14 @@ app.use('/', signUpRoutes);          // Сторінка sign upa
 // api
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/auth', authRoutes); // маршрути для реєстрації та логіну
-app.use('/api/device', deviceRoutes); // маршрути для керування пристроєм
+app.use('/api/devices', deviceRoutes); // маршрути для керування пристроєм
+
 // Запуск сервера
 app.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log('\nstart device\n');
-  console.log('\nstart success\n');
-  // const { initializeClient } = require('./controllers/telegramController');
   // await initializeClient();
+  console.log('\nstart success\n');
 });
 
 export default app;
