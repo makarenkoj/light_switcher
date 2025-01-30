@@ -1,5 +1,5 @@
 import { controlDevice, statusDevice } from '../utils/deviceUtils.js';
-import Device from '../models/deviceModel.js';
+import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
 
 async function show(req, res) {
@@ -9,7 +9,7 @@ async function show(req, res) {
       return res.status(404).json({ error: 'User not found!' });
     };
 
-    const device = await Device.findById(req.params.id);
+    const device = await Devices.findById(req.params.id);
     if (!device) {
       return res.status(404).json({ error: 'Device not found!' });
     };
@@ -25,7 +25,25 @@ async function show(req, res) {
   }
 };
 
-async function index(req, res) {}
+async function index(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found!' });
+    };
+
+    const devices = await Devices.find({userId: user._id});
+
+    if (!devices) {
+      return res.status(404).json({ error: 'Device not found!' });
+    };
+  
+    res.status(200).json({ message: 'Device retrieved successfully', count: devices.length, devices });
+  } catch (error) {
+    console.error('Devices Error:', error);
+    res.status(422).json({ error: 'Failed to find devices!' });
+  }
+}
 
 async function create(req, res) {
   try {
@@ -35,7 +53,16 @@ async function create(req, res) {
     };
 
     const { name, deviceId, accessId, accessSecret } = req.body;
-    const device = await Device.create({ name, deviceId, accessId, accessSecret, userId: user._id });
+    if (!deviceId) {
+      return res.status(400).json({ error: 'Device ID is required!' });
+    };
+
+    const existingDevice = await Devices.findOne({ deviceId });
+    if (existingDevice) {
+      return res.status(409).json({ error: 'Device with this ID already exists!' });
+    };
+
+    const device = await Devices.create({ name, deviceId, accessId, accessSecret, userId: user._id });
 
     res.status(201).json({ message: 'Device created successfully', device: {device} });
   } catch (error) {

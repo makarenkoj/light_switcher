@@ -19,10 +19,13 @@ async function register(req, res) {
 
 async function login(req, res) {
   try {
+    console.log(req.body)
     const { email, password } = req.body;
     const user = await User.findOne({ email });
     
     if (!user || !(await user.comparePassword(password))) {
+      console.log('Invalid email or password')
+
       return res.status(401).json({ error: 'Invalid email or password' });
     };
 

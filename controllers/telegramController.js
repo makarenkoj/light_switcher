@@ -161,6 +161,8 @@ async function signIn(req, res) {
 };
 
 async function checkSession(req, res) {
+  console.log('checkSession:', true);
+
   try {
     const isAuthorized = await client?.isUserAuthorized();
     
