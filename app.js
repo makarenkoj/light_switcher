@@ -35,6 +35,7 @@ import statusRoutes from './routes/status.js';
 import telegramRoutes from './routes/telegram.js';
 import authRoutes from './routes/auth.js';
 import signUpRoutes from './routes/signUp.js';
+import usersRoutes from './routes/users.js';
 import deviceRoutes from './routes/device.js';
 
 // Використання маршрутів
@@ -46,6 +47,7 @@ app.use('/', signUpRoutes);          // Сторінка sign upa
 // api
 app.use('/api/telegram', telegramRoutes);
 app.use('/api/auth', authRoutes); // маршрути для реєстрації та логіну
+app.use('/api/users', usersRoutes); 
 app.use('/api/devices', deviceRoutes); // маршрути для керування пристроєм
 
 // Запуск сервера

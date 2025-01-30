@@ -2,7 +2,6 @@ import 'dotenv/config';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
 const signMethod = "HMAC-SHA256";
-const DEVICE_ID = process.env.DEVICE_ID;
 
 // Function to generate HMAC-SHA256 signature
 function signHMAC(message, secretKey) {
@@ -18,17 +17,13 @@ function sha256(message) {
   return hash.digest("hex");
 }
 
-async function controlDevice(status) {
+async function controlDevice(status, deviceId, accessId, secretKey) {
   // const t = Date.now().toString();
-  // const clientId = process.env.ACCESS_ID;
-  // const secretKey = process.env.ACCESS_SECRET;
-
-  // // Step 1: Generate token request signature
-  // const message = clientId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
+  // const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
   // const signature = signHMAC(message, secretKey).toUpperCase();
   // const url = "https://openapi.tuyaeu.com/v1.0/token?grant_type=1";
   // const headers = {
-  //     "client_id": clientId,
+  //     "client_id": accessId,
   //     "sign": signature,
   //     "t": t,
   //     "sign_method": signMethod
@@ -47,12 +42,12 @@ async function controlDevice(status) {
   //     // Step 2: Device control request
   //     const body = {"commands": [{ "code": "switch_1", "value": status }]};
   //     const bodyHash = sha256(JSON.stringify(body));
-  //     const controlMessage = `${clientId}${accessToken}${t}POST\n${bodyHash}\n\n/v1.0/devices/${DEVICE_ID}/commands`;
+  //     const controlMessage = `${accessId}${accessToken}${t}POST\n${bodyHash}\n\n/v1.0/devices/${deviceId}/commands`;
   //     const controlSignature = signHMAC(controlMessage, secretKey).toUpperCase();
-  //     const controlUrl = `https://openapi.tuyaeu.com/v1.0/devices/${DEVICE_ID}/commands`;
+  //     const controlUrl = `https://openapi.tuyaeu.com/v1.0/devices/${deviceId}/commands`;
 
   //     const controlHeaders = {
-  //         "client_id": clientId,
+  //         "client_id": accessId,
   //         "access_token": accessToken,
   //         "sign": controlSignature,
   //         "t": t,
@@ -76,17 +71,13 @@ async function controlDevice(status) {
   return status; // mock device response
 };
 
-async function statusDevice() {
+async function statusDevice(deviceId, accessId, secretKey) {
   const t = Date.now().toString();
-  const clientId = process.env.ACCESS_ID;
-  const secretKey = process.env.ACCESS_SECRET;
-
-  // Step 1: Generate token request signature
-  const message = clientId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
+  const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
   const signature = signHMAC(message, secretKey).toUpperCase();
   const url = "https://openapi.tuyaeu.com/v1.0/token?grant_type=1";
   const headers = {
-      "client_id": clientId,
+      "client_id": accessId,
       "sign": signature,
       "t": t,
       "sign_method": signMethod
@@ -102,14 +93,14 @@ async function statusDevice() {
 
       const accessToken = tokenData.result.access_token;
       const nonce = crypto.randomUUID();
-      const urlPath = `/v1.0/devices/${DEVICE_ID}/status`;
+      const urlPath = `/v1.0/devices/${deviceId}/status`;
       const stringToSign = `GET\n${'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'}\n\n${urlPath}`;
-      const str = `${clientId}${accessToken}${t}${nonce}${stringToSign}`;
+      const str = `${accessId}${accessToken}${t}${nonce}${stringToSign}`;
       const sign = signHMAC(str, secretKey).toUpperCase();
       const statusResponse = await fetch(`https://openapi.tuyaeu.com${urlPath}`, {
         method: 'GET',
         headers: {
-          'client_id': clientId,
+          'client_id': accessId,
           'access_token': accessToken,
           'sign': sign,
           't': t,
