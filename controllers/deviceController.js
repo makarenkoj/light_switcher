@@ -141,7 +141,21 @@ async function remove(req, res) {
 
 async function getStatus(req, res) {
   try {
-    const deviceStatus = await statusDevice();
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found!' });
+    };
+
+    const device = await Devices.findById(req.params.id);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found!' });
+    };
+
+    if (device.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+    };
+
+    const deviceStatus = await statusDevice(device.deviceId, device.accessId, device.accessSecret);
     let status = false;
 
     deviceStatus.result.forEach(device => {
@@ -150,7 +164,7 @@ async function getStatus(req, res) {
       }
     });
 
-    res.status(200).json({ message: `Device`, body: status });
+    res.status(200).json({ message: `Device status retrieved  successfull`, status: status });
   }
   catch (error) {
     res.status(422).json({ error: error.message });
