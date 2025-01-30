@@ -33,7 +33,7 @@ async function login(req, res) {
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
     console.log('USER:', user)
 
-    res.status(200).json({ message: 'Login successful', token, restoredSesion: restoredSesion });
+    res.status(200).json({ message: 'Login successful', token, restoredSesion: restoredSesion, userId: user._id });
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ error: 'Login failed' });
