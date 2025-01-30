@@ -45,8 +45,27 @@ async function initializeClient(id) {
 
 async function sendCode(req, res) {
   try {
+    console.log('sendCode:', true);
     const user = await User.findById(req.user._id);
+    const sessionData = await Session.findOne({ userId: user._id });
+    const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
+  
+    client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
+    await client.connect();
+    console.log('Telegram Client Initialized');
+  
+    if (await client.isUserAuthorized()) {
+      console.log('SESSION: Сесія успішно відновлена');
+      await sendAndHandleMessages(client, process.env.INFO_CHANEL_NAME, 
+                                  "Сесія відновлена успішно", 
+                                  "Користувач повернувся до системи.");
+      return res.status(200).json({ authorized: true, message: 'Сесія відновлена успішно!' });
+    } else {
+      console.log('SESSION: sesion not restored!')
+    };
+
     const phoneNumber = user.phoneNumber;
+    console.log('USER:', user)
 
     if (!phoneNumber) {
       return res.status(422).json({ error: 'Could you please add phone number to your account!' });
@@ -65,11 +84,12 @@ async function sendCode(req, res) {
         }),
       })
     );
-
+    console.log('RESULT:', result); //remove
     console.log('USER:', user)
 
     res.status(200).json({ phoneCodeHash: result.phoneCodeHash, phoneNumber, message: 'Code sent successfully' });
   } catch (error) {
+    console.log('ERROR:', error); //remove
     res.status(500).json({ error: 'Failed to send code' });
   }
 };
@@ -108,6 +128,7 @@ async function signIn(req, res) {
 
       return res.status(200).json({ message: 'Sign-in successful', user: result.user, authorized: true });
     } else {
+      console.log('Error:', result);
       return res.status(401).json({ error: 'Sign-in failed', authorized: false });
     }
   } catch (error) {
