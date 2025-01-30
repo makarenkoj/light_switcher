@@ -52,7 +52,7 @@ async function create(req, res) {
       return res.status(404).json({ error: 'User not found!' });
     };
 
-    const { name, deviceId, accessId, accessSecret } = req.body;
+    const { name, deviceId, accessId, secretKey } = req.body;
     if (!deviceId) {
       return res.status(400).json({ error: 'Device ID is required!' });
     };
@@ -62,7 +62,7 @@ async function create(req, res) {
       return res.status(409).json({ error: 'Device with this ID already exists!' });
     };
 
-    const device = await Devices.create({ name, deviceId, accessId, accessSecret, userId: user._id });
+    const device = await Devices.create({ name, deviceId, accessId, secretKey, userId: user._id });
 
     res.status(201).json({ message: 'Device created successfully', device: {device} });
   } catch (error) {
@@ -87,13 +87,13 @@ async function update(req, res) {
       return res.status(403).json({ error: 'You are not authorized to delete this device!' });
     };
 
-    const { name, deviceId, accessId, accessSecret } = req.body;
+    const { name, deviceId, accessId, secretKey } = req.body;
 
     const updateFields = {};
     if (name) updateFields.name = name;
     if (deviceId) updateFields.deviceId = deviceId;
     if (accessId) updateFields.accessId = accessId;
-    if (accessSecret) updateFields.accessSecret = accessSecret;
+    if (secretKey) updateFields.secretKey = secretKey;
 
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({ error: 'Nothing to update!' });
@@ -155,7 +155,7 @@ async function getStatus(req, res) {
       return res.status(403).json({ error: 'You are not authorized to delete this device!' });
     };
 
-    const deviceStatus = await statusDevice(device.deviceId, device.accessId, device.accessSecret);
+    const deviceStatus = await statusDevice(device.deviceId, device.accessId, device.secretKey);
     let status = false;
 
     deviceStatus.result.forEach(device => {
@@ -163,6 +163,8 @@ async function getStatus(req, res) {
         status = device.value;
       }
     });
+
+    await device.updateOne({ status });
 
     res.status(200).json({ message: `Device status retrieved  successfull`, status: status });
   }
@@ -173,11 +175,28 @@ async function getStatus(req, res) {
 
 async function changeStatus(req, res) {
   try {
-    const { status } = req.body;
-    const device = await controlDevice(status);
-    console.log('Device:', device);
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found!' });
+    };
 
-    res.status(200).json({ message: `Device is ${status ? 'ON' : 'OFF'}`, body: device });
+    const device = await Devices.findById(req.params.id);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found!' });
+    };
+
+    if (device.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+    };
+
+
+    const { status } = req.body;
+    const deviceData = await controlDevice(status, device.deviceId, device.accessId, device.secretKey);
+    console.log('Device:', deviceData );
+
+    await device.updateOne({ status });
+
+    res.status(200).json({ message: `Device is ${status ? 'ON' : 'OFF'}`, body: deviceData });
   }
   catch (error) {
     res.status(422).json({ error: error.message });
