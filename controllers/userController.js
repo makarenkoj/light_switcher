@@ -27,8 +27,22 @@ async function show(req, res) {
 
 async function update(req, res) {
   try {
+    console.log('Update User:', req.body);
     const { email, password, phoneNumber } = req.body;
-    const user = await User.findByIdAndUpdate(req.user._id, { email, password, phoneNumber }, { new: true }).select('-password');
+    const updateFields = {};
+    if (email) updateFields.email = email;
+    if (password) updateFields.password = password;
+    if (phoneNumber) updateFields.phoneNumber = phoneNumber;
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({ error: 'Nothing to update!' });
+    };
+
+    if (await User.findOne({ email })) {  
+      return res.status(400).json({ error: 'Email already in use!' });
+    };
+
+    const user = await User.findByIdAndUpdate(req.user._id, updateFields, { new: true }).select('-password');
 
     res.status(200).json({ message: 'User updated successfully', user });
   } catch (error) {
