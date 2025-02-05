@@ -28,17 +28,30 @@ async function show(req, res) {
 async function index(req, res) {
   try {
     const user = await User.findById(req.user._id);
+
     if (!user) {
       return res.status(404).json({ error: 'User not found!' });
     };
+console.log('Query:', req.query);
 
-    const devices = await Devices.find({userId: user._id});
+    let { page = 1, limit = 9 } = req.query;
+    page = parseInt(page);
+    limit = parseInt(limit);
+    const skip = (page - 1) * limit;
+
+    const devices = await Devices.find({userId: user._id}).sort({ createdAt: -1 }).skip(skip).limit(limit);
+    const totalDevices = await Devices.countDocuments({ userId: user._id });
 
     if (!devices) {
       return res.status(404).json({ error: 'Device not found!' });
     };
   
-    res.status(200).json({ message: 'Device retrieved successfully', count: devices.length, devices });
+    res.status(200).json({message: 'Device retrieved successfully',
+                          currentPage: page,
+                          totalPages: Math.ceil(totalDevices / limit),
+                          totalDevices,
+                          devices
+    });
   } catch (error) {
     console.error('Devices Error:', error);
     res.status(422).json({ error: 'Failed to find devices!' });
@@ -46,6 +59,7 @@ async function index(req, res) {
 }
 
 async function create(req, res) {
+  console.log('Create Device:', req.body);
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
