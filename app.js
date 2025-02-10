@@ -37,6 +37,7 @@ import authRoutes from './routes/auth.js';
 import signUpRoutes from './routes/signUp.js';
 import usersRoutes from './routes/users.js';
 import deviceRoutes from './routes/device.js';
+import triggerRoutes from './routes/trigger.js';
 
 // Використання маршрутів
 // front
@@ -49,6 +50,7 @@ app.use('/api/telegram', telegramRoutes);
 app.use('/api/auth', authRoutes); // маршрути для реєстрації та логіну
 app.use('/api/users', usersRoutes); 
 app.use('/api/devices', deviceRoutes); // маршрути для керування пристроєм
+app.use('/api/triggers', triggerRoutes);
 
 // Запуск сервера
 app.listen(PORT, async () => {

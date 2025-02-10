@@ -6,7 +6,8 @@ const devicesSchema = new mongoose.Schema({
   accessId: { type: String, required: true },
   secretKey: { type: String, required: true },
   status: { type: Boolean, default: false },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  deviceTrigerId: { type: mongoose.Schema.Types.ObjectId, ref: 'DeviceTriger' }
 }, { timestamps: true });
 
 export default mongoose.model('Devices', devicesSchema);

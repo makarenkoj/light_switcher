@@ -3,6 +3,8 @@ import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
 
 async function show(req, res) {
+  console.log('Show Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -26,13 +28,14 @@ async function show(req, res) {
 };
 
 async function index(req, res) {
+  console.log('Index Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found!' });
     };
-console.log('Query:', req.query);
 
     let { page = 1, limit = 9 } = req.query;
     page = parseInt(page);
@@ -86,6 +89,8 @@ async function create(req, res) {
 };
 
 async function update(req, res) {
+  console.log('Update Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -130,6 +135,8 @@ async function update(req, res) {
 };
 
 async function remove(req, res) {
+  console.log('Update Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -154,6 +161,8 @@ async function remove(req, res) {
 };
 
 async function getStatus(req, res) {
+  console.log('Get status Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -188,6 +197,8 @@ async function getStatus(req, res) {
 }
 
 async function changeStatus(req, res) {
+  console.log('Change status Device:', req.body);
+
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
@@ -202,7 +213,6 @@ async function changeStatus(req, res) {
     if (device.userId.toString() !== user._id.toString()) {
       return res.status(403).json({ error: 'You are not authorized to delete this device!' });
     };
-
 
     const { status } = req.body;
     const deviceData = await controlDevice(status, device.deviceId, device.accessId, device.secretKey);
