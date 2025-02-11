@@ -38,6 +38,7 @@ import signUpRoutes from './routes/signUp.js';
 import usersRoutes from './routes/users.js';
 import deviceRoutes from './routes/device.js';
 import triggerRoutes from './routes/trigger.js';
+// import deviceTriggerRoutes from './routes/deviceTrigger.js';
 
 // Використання маршрутів
 // front

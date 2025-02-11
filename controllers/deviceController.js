@@ -1,6 +1,8 @@
 import { controlDevice, statusDevice } from '../utils/deviceUtils.js';
 import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
+import DevicesTriggers from '../models/devicesTriggersModel.js';
+import Triggers from '../models/triggersModel.js';
 
 async function show(req, res) {
   console.log('Show Device:', req.body);
@@ -19,8 +21,10 @@ async function show(req, res) {
     if (device.userId.toString() !== user._id.toString()) {
       return res.status(403).json({ error: 'You are not authorized to view this device!' });
     };
-  
-    res.status(200).json({ message: 'Device retrieved successfully', device });
+
+    const devicesTriggers = await DevicesTriggers.find({deviceId: device._id}).sort({ createdAt: -1 });
+
+    res.status(200).json({ message: 'Device retrieved successfully', device, devicesTriggers });
   } catch (error) {
     console.error('Show Device Error:', error);
     res.status(422).json({ error: 'Failed to retrieve device!' });
@@ -227,4 +231,47 @@ async function changeStatus(req, res) {
   }
 }
 
-export { changeStatus, getStatus, show, index, update, create, remove };
+async function triggers(req, res) {
+    console.log('Index triggers:', req);
+
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found!' });
+        }
+
+        let { page = 1, limit = 9 } = req.query;
+        page = parseInt(page);
+        limit = parseInt(limit);
+        const skip = (page - 1) * limit;
+        
+        const device = await Devices.findById(req.params.id);
+        if (!device) {
+          return res.status(404).json({ error: 'Device not found!' });
+        }
+
+        const devicesTriggers = await DevicesTriggers.find({deviceId: device._id }).sort({ createdAt: -1 });
+        if (!devicesTriggers) {
+          return res.status(404).json({ error: 'Devices Triggers not found!' });
+        };
+
+        const triggers = await Triggers.find({ userId: user._id, _id: { $in: devicesTriggers.map(dt => dt.triggerId) } }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        if (!triggers) {
+          return res.status(404).json({ error: 'Triggers not found!' });
+        };
+
+        const totalTriggers = await Triggers.countDocuments({ userId: user._id, _id: { $in: devicesTriggers.map(dt => dt.triggerId) } });
+
+        res.status(200).json({message: 'Triggers retrieved successfully',
+            currentPage: page,
+            totalPages: Math.ceil(totalTriggers / limit),
+            totalTriggers,
+            triggers
+        });
+    } catch (error) {
+        console.error('Triggers Error:', error);
+        res.status(422).json({ error: error.message });
+    }
+}
+
+export { changeStatus, getStatus, show, index, update, create, remove, triggers};

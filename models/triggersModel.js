@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const triggerSchema = new mongoose.Schema({
+const triggersSchema = new mongoose.Schema({
   name: { type: String, required: true },
   triggerOn: { type: String, required: true },
   triggerOff: { type: String, required: true },
@@ -9,4 +9,10 @@ const triggerSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
-export default mongoose.model('Trigger', triggerSchema);
+triggersSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+  const triggerId = this._id;
+  await mongoose.model('DevicesTriggers').deleteMany({ triggerId });
+  next();
+});
+
+export default mongoose.model('Triggers', triggersSchema);
