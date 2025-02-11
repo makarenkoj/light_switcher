@@ -1,5 +1,7 @@
 import Triggers from '../models/triggersModel.js';
 import User from '../models/userModel.js';
+import Devices from '../models/devicesModel.js';
+import DevicesTriggers from '../models/devicesTriggersModel.js';
 
 export async function show(req, res) {
     try {
@@ -121,5 +123,37 @@ export async function remove(req, res) {
         res.json({ message: 'Trigger deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+}
+
+export async function getFilteredTriggers(req, res) {
+    console.log('Get filtered triggers:', req.query, req.params);
+
+    try {
+        const user = await User.findById(req.user._id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found!' });
+        }
+
+        const device = await Devices.findById(req.query.deviceId);
+
+        if (!device) {
+        return res.status(404).json({ error: 'Device not found!' });
+        };
+
+        const linkedTriggers = await DevicesTriggers.find({ deviceId: device._id }).distinct('triggerId');
+
+        let { page = 1, limit = 9 } = req.query;
+        page = parseInt(page);
+        limit = parseInt(limit);
+        const skip = (page - 1) * limit;
+
+        const triggers = await Triggers.find({ _id: { $nin: linkedTriggers }, userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+
+        res.status(200).json({ message: 'Triggers fetched successfully', triggers });
+    } catch (error) {
+        console.error('Error fetching triggers:', error);
+        res.status(500).json({ error: 'Failed to fetch triggers' });
     }
 }
