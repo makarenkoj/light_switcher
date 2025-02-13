@@ -2,6 +2,7 @@ import 'dotenv/config';
 import fetch from 'node-fetch';
 import crypto from 'crypto';
 const signMethod = "HMAC-SHA256";
+import Devices from '../models/devicesModel.js';
 
 // Function to generate HMAC-SHA256 signature
 function signHMAC(message, secretKey) {
@@ -17,7 +18,22 @@ function sha256(message) {
   return hash.digest("hex");
 }
 
-async function controlDevice(status, deviceId, accessId, secretKey) {
+async function controlDevice(id, status, deviceId, accessId, secretKey) {
+
+  try {  
+    const device = await Devices.findById(id);
+      if (!device) {
+        return { error: 'Device not found!' };
+      };
+      console.log('Device:', id);
+      await device.updateOne({ status });
+
+    return status;
+  } catch (error) {
+    console.error('Created Error:', error);
+  }
+
+// mock device
   // const t = Date.now().toString();
   // const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
   // const signature = signHMAC(message, secretKey).toUpperCase();
@@ -68,7 +84,7 @@ async function controlDevice(status, deviceId, accessId, secretKey) {
   // } catch (error) {
   //     console.error("Error during device control:", error);
   // }
-  return status; // mock device response
+  // mock device response
 };
 
 async function statusDevice(deviceId, accessId, secretKey) {

@@ -35,7 +35,8 @@ async function initializeClient(id) {
     console.log('Сесія успішно відновлена');
     await sendAndHandleMessages(client, process.env.INFO_CHANEL_NAME, 
                                 "Сесія відновлена успішно", 
-                                "Користувач повернувся до системи.");
+                                "Користувач повернувся до системи.",
+                                user);
     return true;
   } else {
     console.log('SESSION: sesion not restored!')
@@ -58,7 +59,8 @@ async function sendCode(req, res) {
       console.log('SESSION: Сесія успішно відновлена');
       await sendAndHandleMessages(client, process.env.INFO_CHANEL_NAME, 
                                   "Сесія відновлена успішно", 
-                                  "Користувач повернувся до системи.");
+                                  "Користувач повернувся до системи.",
+                                  user);
       return res.status(200).json({ authorized: true, message: 'Сесія відновлена успішно!' });
     } else {
       console.log('SESSION: sesion not restored!')
@@ -124,7 +126,7 @@ async function signIn(req, res) {
 
     if (result.className === "auth.Authorization" && result.user) {
       saveSession(user._id);
-      await sendAndHandleMessages(client, INFO_CHANEL_NAME, "Hello!\n Session saved to file.", "Hello!\n Session saved to file.");
+      await sendAndHandleMessages(client, INFO_CHANEL_NAME, "Hello!\n Session saved to file.", "Hello!\n Session saved to file.", user);
 
       return res.status(200).json({ message: 'Sign-in successful', user: result.user, authorized: true });
     } else {

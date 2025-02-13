@@ -219,8 +219,7 @@ async function changeStatus(req, res) {
     };
 
     const { status } = req.body;
-    const deviceData = await controlDevice(status, device.deviceId, device.accessId, device.secretKey);
-    console.log('Device:', deviceData );
+    const deviceData = await controlDevice(device._id, status, device.deviceId, device.accessId, device.secretKey);
 
     await device.updateOne({ status });
 
@@ -232,7 +231,7 @@ async function changeStatus(req, res) {
 }
 
 async function triggers(req, res) {
-    console.log('Index triggers:', req);
+    console.log('Index triggers:', req.params);
 
     try {
         const user = await User.findById(req.user._id);
