@@ -1,4 +1,4 @@
-import {getUserTriggers} from './deviceHandler.js';
+import {getUserDeviceTriggers} from './deviceHandler.js';
 import {controlDevice} from './deviceUtils.js';
 
 async function sendAndHandleMessages(client, channelName, userMessage, channelMessage, user) {
@@ -23,7 +23,7 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
 
 async function handleTriggerInMessage(user, update, client) {
   try {
-    const userDevicesTriggers = await getUserTriggers(user);
+    const userDevicesTriggers = await getUserDeviceTriggers(user);
     const message = update.message.message || update.message;
     
     for (const { device, triggers } of userDevicesTriggers) {
@@ -37,16 +37,16 @@ async function handleTriggerInMessage(user, update, client) {
           continue;
         }
 
-        if (update?.message && update?.message?.peerId?.channelId?.value === chat?.id?.value) {
+        if (message && update?.message?.peerId?.channelId?.value === chat?.id?.value) {
           if (message?.includes(trigger.triggerOn)) {
+            await trigger.updateOne({ status: true });
+            await controlDevice(device._id);
             console.log('Trigger ON:', message);
-            await controlDevice(device._id, true, device.accessId, device.secretKey);
           } else if (message?.includes(trigger.triggerOff)) {
+            await trigger.updateOne({ status: false });
+            await controlDevice(device._id);
             console.log('Trigger Off:', message);
-            await controlDevice(device._id, false, device.accessId, device.secretKey);
           }
-        } else if (message?.includes(trigger.triggerOff)) {
-          await controlDevice(device._id, false, device.accessId, device.secretKey);
         }
       }
     }

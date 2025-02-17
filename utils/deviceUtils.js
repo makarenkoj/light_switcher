@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 import crypto from 'crypto';
 const signMethod = "HMAC-SHA256";
 import Devices from '../models/devicesModel.js';
+import Triggers from '../models/triggersModel.js';
+import DevicesTriggers from '../models/devicesTriggersModel.js';
 
 // Function to generate HMAC-SHA256 signature
 function signHMAC(message, secretKey) {
@@ -18,22 +20,41 @@ function sha256(message) {
   return hash.digest("hex");
 }
 
-async function controlDevice(id, status, deviceId, accessId, secretKey) {
-
+async function controlDevice(deviceId) {
   try {  
-    const device = await Devices.findById(id);
-      if (!device) {
-        return { error: 'Device not found!' };
-      };
-      console.log('Device:', id);
-      await device.updateOne({ status });
+    const device = await Devices.findById(deviceId);
 
-    return status;
+    if (!device) {
+      return { error: 'Device not found!' };
+    };
+
+    const devicesTriggers = await DevicesTriggers.find({deviceId: device._id}).sort({ createdAt: -1 });
+    const triggers = await Triggers.find({_id: devicesTriggers.map(dt => dt.triggerId)}, { status: 1, _id: 0 } ).sort({ createdAt: -1 });
+    const statuses = triggers.map(trigger => trigger.status);
+    const status = statuses.length > 0 && statuses.every(s => s === true);
+
+    await handleStatusDevice(deviceId, status);
+    await device.updateOne({ status });
+
+    return device.status;
   } catch (error) {
     console.error('Created Error:', error);
   }
+};
+
+async function handleStatusDevice(deviceId, status) {
+  // add device 
+  const device = await Devices.findById(deviceId);
+
+  if (!device) {
+    return { error: 'Device not found!' };
+  };
+
+  return status;
 
 // mock device
+// const accessId = device.accessId;
+// const secretKey = device.secretKey;
   // const t = Date.now().toString();
   // const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
   // const signature = signHMAC(message, secretKey).toUpperCase();
@@ -87,7 +108,15 @@ async function controlDevice(id, status, deviceId, accessId, secretKey) {
   // mock device response
 };
 
-async function statusDevice(deviceId, accessId, secretKey) {
+async function statusDevice(deviceId) {
+  const device = await Devices.findById(deviceId);
+
+  if (!device) {
+    return { error: 'Device not found!' };
+  };
+
+  const accessId = device.accessId;
+  const secretKey = device.secretKey;
   const t = Date.now().toString();
   const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
   const signature = signHMAC(message, secretKey).toUpperCase();
@@ -133,4 +162,5 @@ async function statusDevice(deviceId, accessId, secretKey) {
   }
 };
 
-export { controlDevice, statusDevice };
+export { controlDevice, statusDevice, handleStatusDevice };
+
