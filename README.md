@@ -14,7 +14,7 @@ For start application:
 
 * run this command in terminal and follow further instructions:
 
-    ` node telegram.js `
+    ` docker compose up `
 
 * follow the instructions in yours cli
 
@@ -23,3 +23,11 @@ For start application:
 Documentation Smart Home: [link](https://developer.tuya.com/en/docs/cloud/device-control?id=K95zu01ksols7)
 
 Projects and enviroment [link](https://platform.tuya.com/cloud/)
+
+Start tests:
+
+ * `npm test`
+
+Tests coverage:
+
+ * `npx jest --coverage`
