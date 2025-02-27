@@ -4,14 +4,12 @@
     "bcrypt": "^5.1.1",
     "bigint-mod-arith": "^3.3.1",
     "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
     "crypto": "^1.0.1",
-    "dotenv": "^16.4.5",
     "expres": "^0.0.5",
     "express": "^4.21.1",
     "fs": "^0.0.1-security",
-    "jsonwebtoken": "^9.0.2",
     "luxon": "^3.5.0",
-    "mongoose": "^8.8.4",
     "node-fetch": "^3.3.2",
     "path": "^0.12.7",
     "telega": "^2.1.0",
@@ -19,15 +17,21 @@
     "telegram-mtproto": "^1.0.5"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "babel-jest": "^29.7.0",
+    "dotenv": "^16.4.7",
     "jest": "^29.7.0",
+    "jsonwebtoken": "^9.0.2",
     "mongodb-memory-server": "^10.1.2",
+    "mongoose": "^8.9.3",
     "supertest": "^7.0.0"
   },
   "scripts": {
-    "test": "jest"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest"
   },
-    "name": "your-project",
-    "version": "1.0.0",
-    "type": "module",
-    "main": "app.js"
+  "name": "your-project",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "app.js"
 }

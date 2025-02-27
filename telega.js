@@ -1,20 +1,26 @@
-require('dotenv').config()
+// require('dotenv').config()
+import 'dotenv/config';
 
-const { Api, TelegramClient } = require('telegram');
-const { StringSession } = require('telegram/sessions');
-const path = require("path");
-const express = require("express");
-const bodyParser = require("body-parser");
+import { Api, TelegramClient } from 'telegram';
+// const { Api, TelegramClient } = require('telegram');
+import { StringSession } from 'telegram/sessions/index.js';
+// const { StringSession } = require('telegram/sessions');
+import path from "path";
+// const path = require("path");
+import express from "express";
+// const express = require("express");
+import bodyParser from "body-parser";
+// const bodyParser = require("body-parser");
 const app = express();
-const fs = require('fs');
+import fs from 'fs';
 const {API_ID, API_HASH, ACCESS_ID, ACCESS_SECRET, PASSWORD, PHONE, DEVICE_ID, INFO_CHANEL_NAME, LATITUDE, LONGITUDE} = process.env
 const apiId = parseInt(API_ID);
 const apiHash = API_HASH;
 const sessionFile = './session.txt';
 const stringSession = fs.existsSync(sessionFile) ? new StringSession(fs.readFileSync(sessionFile, 'utf-8')) : new StringSession('');
 const PORT = process.env.PORT || 3000;
-const crypto = require('crypto');
-const { modPow } = require('bigint-mod-arith');
+import crypto from 'crypto';
+import { modPow } from 'bigint-mod-arith';
 
 // for 2FA
 async function prepareSRP(passwordInfo, password) {
@@ -74,6 +80,10 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
     console.error('Помилка під час надсилання повідомлень:', error);
   }
 }
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // app.js
 app.use(bodyParser.json());
@@ -81,15 +91,15 @@ app.use(bodyParser.json());
 // Додаємо статичну папку
 app.use(express.static(path.join(__dirname, "public")));
 
-// Підключення маршрутів
-const indexRoutes = require('./routes/index');
-const statusRoutes = require('./routes/status');
-const authRoutes = require('./routes/auth');
+// // Підключення маршрутів
+// const indexRoutes = require('./routes/index');
+// const statusRoutes = require('./routes/status');
+// const authRoutes = require('./routes/auth');
 
-// Використання маршрутів
-app.use('/', indexRoutes);           // Головна сторінка
-app.use('/', statusRoutes);          // Сторінка статусу
-app.use('/', authRoutes);            // Логін і реєстрація
+// // Використання маршрутів
+// app.use('/', indexRoutes);           // Головна сторінка
+// app.use('/', statusRoutes);          // Сторінка статусу
+// app.use('/', authRoutes);            // Логін і реєстрація
 
 // Запуск сервера
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

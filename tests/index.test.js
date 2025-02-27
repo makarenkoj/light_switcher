@@ -1,9 +1,10 @@
-require('dotenv').config({ path: '.env.test' });
-const jwt = require('jsonwebtoken');
-const request = require('supertest');
-const mongoose = require('mongoose');
-const app = require('../app');
-const User = require('../models/userModel');
+import { config } from 'dotenv';
+config({ path: '.env.test' });
+import jwt from 'jsonwebtoken';
+import request from 'supertest';
+import mongoose from 'mongoose';
+import app from '../app.js';
+import User from '../models/userModel.js';
 
 let server;
 let user;

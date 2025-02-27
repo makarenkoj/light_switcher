@@ -1,7 +1,6 @@
 export default {
-  globalSetup: './tests/globalSetup.js',
-  globalTeardown: './tests/globalTeardown.js',
+  transform: {
+    '^.+\\.jsx?$': 'babel-jest',
+  },
   testEnvironment: 'node',
-  maxWorkers: 1,
-  verbose: true
 };

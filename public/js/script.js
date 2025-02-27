@@ -2,7 +2,7 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem('token');
-
+console.log('TOKEN script:', token);
   if (!token) {
     window.location.href = '/login'
     localStorage.removeItem('phoneNumber');
@@ -30,9 +30,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       data.authorized === true ? window.location.href = '/status' : document.getElementById("message").innerText = 'Telegram not Authorize.\nPlease Authorize!';
     } else {
       document.getElementById("phone-message").innerText = data.error;
-      localStorage.removeItem('authorized');
-      localStorage.removeItem('token');
-      window.location.href = '/login'
+    console.log('DATA:', data);
+
+      // localStorage.removeItem('authorized');
+      // localStorage.removeItem('token');
+      // window.location.href = '/login'
       throw new Error(data.error)
     }
 
@@ -71,6 +73,8 @@ document.getElementById("phone-form").addEventListener("submit", async (e) => {
       document.getElementById("step-2").style.display = "block";
       document.getElementById("message").innerText = data.message;
     } else {
+      document.getElementById("step-1").style.display = "none";
+      document.getElementById("step-2").style.display = "block";
       document.getElementById("phone-message").innerText = data.error;
       throw new Error(data.error)
     }
@@ -102,6 +106,9 @@ document.getElementById("code-form").addEventListener("submit", async (e) => {
       localStorage.removeItem('step');
       window.location.href = '/status'
     } else {
+    console.log('DATA:', data);
+    console.log('Details:', data.details);
+
       localStorage.removeItem('step');
       document.getElementById("message").innerText = data.error;
       throw new Error(data.error)

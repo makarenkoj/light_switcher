@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { config } from 'dotenv';
+config({ path: '.env.test' });
 
 import request from 'supertest';
 import mongoose from 'mongoose';
@@ -40,7 +40,7 @@ describe('Telegram API Tests', () => {
       .post('/api/telegram/sendCode')
       .set('Authorization', `Bearer ${token}`)
       .send({ phoneNumber: '+380505782233' });
-    
+    console.log(response);
     expect(response.statusCode).toBe(500);
     expect(response.body).toHaveProperty('error', 'Failed to send code');
     expect(response.body).not.toHaveProperty('phoneCodeHash');

@@ -1,7 +1,8 @@
-require('dotenv').config({ path: '.env.test' });
-const jwt = require('jsonwebtoken');
-const authenticateUser = require('../middleware/authMiddleware');
-const User = require('../models/userModel');
+import { config } from 'dotenv';
+config({ path: '.env.test' });
+import jwt from 'jsonwebtoken';
+import authenticateUser from '../middleware/authMiddleware.js';
+import User from '../models/userModel.js';
 
 jest.mock('jsonwebtoken');
 jest.mock('../models/userModel');

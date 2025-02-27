@@ -108,6 +108,5 @@ describe('Device Utils Tests', () => {
       consoleSpy.mockRestore();
     });
   });
-
 });
-
+console.log("Рекомендуем установить расширение для прогона jest тестов.");
