@@ -76,6 +76,7 @@ web_modules/
 .env
 .env.development.local
 .env.test.local
+.env.test
 .env.production.local
 .env.local
 
@@ -103,6 +104,7 @@ dist
 # vuepress v2.x temp and cache directory
 .temp
 .cache
+session.txt
 
 # Docusaurus cache and generated files
 .docusaurus
@@ -121,6 +123,7 @@ dist
 
 # Stores VSCode versions used for testing VSCode extensions
 .vscode-test
+.vscode/launch.json
 
 # yarn v2
 .yarn/cache

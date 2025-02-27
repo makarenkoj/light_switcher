@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Light Svitcher</title>
+        <link rel="stylesheet" href="/css/style.css">
+    </head>
+    <body>
+        <div class="service center">
+            <div class="title degraded">
+                Light Svitcher
+            </div>
+            <div class="container">
+                <div class="login">
+                    <h1>Telegram Login</h1>
+
+                    <p id="message"></p>
+                    <!-- Форма для номера телефону -->
+                    <div id="step-1">
+                      <h2>Step 1: Enter Phone Number</h2>
+                      <form id="phone-form">
+                        <input type="text" id="phone" placeholder="Enter your phone number" required>
+                        <button type="submit">Send SMS</button>
+                      </form>
+                      <p id="phone-message"></p>
+                    </div>
+                  
+                    <!-- Форма для SMS-коду -->
+                    <div id="step-2" style="display:none;">
+                      <h2>Step 2: Enter SMS Code</h2>
+                      <form id="code-form">
+                        <input type="text" id="code" placeholder="Enter SMS code" required>
+                        <button type="submit">Verify Code</button>
+                      </form>
+                      <p id="code-message"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/js/script.js"></script>
+    </body>
+</html>
