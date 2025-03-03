@@ -183,4 +183,21 @@ async function checkSession(req, res) {
   }
 };
 
-export { initializeClient, sendCode, signIn, checkSession };
+async function getClient() {
+  try {
+    const isAuthorized = await client?.isUserAuthorized();
+
+    if (isAuthorized){
+      return client;
+    } else if (await initializeClient(req.user._id)) {
+      return client;
+    } else {
+      return null;
+    };
+
+  } catch (error) {
+    console.error('Client Error:', error);
+  }
+}
+
+export { initializeClient, sendCode, signIn, checkSession, getClient };

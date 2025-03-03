@@ -5,6 +5,7 @@ const triggersSchema = new mongoose.Schema({
   triggerOn: { type: String, required: true },
   triggerOff: { type: String, required: true },
   chanelName: { type: String, required: true },
+  chanelId: { type: String, required: true },
   status: { type: Boolean, required: true },
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
