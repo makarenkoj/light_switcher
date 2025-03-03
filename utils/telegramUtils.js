@@ -1,5 +1,5 @@
-import {getUserDeviceTriggers} from './deviceHandler.js';
 import {controlDevice} from './deviceUtils.js';
+import Triggers from '../models/triggersModel.js';
 
 async function sendAndHandleMessages(client, channelName, userMessage, channelMessage, user) {
   try {
@@ -7,10 +7,10 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
     await client.sendMessage(channelName, { message: channelMessage });
 
     client.addEventHandler(async (update) => {
-      if (update.message) {
+      if (update.message && update.message?.peerId?.channelId?.value) {
         const message = update.message.message || update.message;
 
-        await handleTriggerInMessage(user, update, client);
+        await handleTriggerInMessage(update);
         console.log('Вхідне повідомлення:', message);
       }
     });
@@ -21,32 +21,22 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
   }
 };
 
-async function handleTriggerInMessage(user, update, client) {
+async function handleTriggerInMessage(update) {
   try {
-    const userDevicesTriggers = await getUserDeviceTriggers(user);
     const message = update.message.message || update.message;
-    
-    for (const { device, triggers } of userDevicesTriggers) {
+    const chanelId = update.message?.peerId?.channelId?.value;
+    const triggers = await Triggers.find({chanelId: chanelId});
+
+    if (triggers.length > 0) {
       for (const trigger of triggers) {
-        let chat;
-
-        try {
-          chat = await client.getEntity(trigger.chanelName);
-        } catch (error) {
-          console.error(`Канал ${trigger.chanelName} не знайдено:`, error);
-          continue;
-        }
-
-        if (message && update?.message?.peerId?.channelId?.value === chat?.id?.value) {
-          if (message?.includes(trigger.triggerOn)) {
-            await trigger.updateOne({ status: true });
-            await controlDevice(device._id);
-            console.log('Trigger ON:', message);
-          } else if (message?.includes(trigger.triggerOff)) {
-            await trigger.updateOne({ status: false });
-            await controlDevice(device._id);
-            console.log('Trigger Off:', message);
-          }
+        if (message.includes(trigger.triggerOn)) {
+          await trigger.updateOne({ status: true });
+          await controlDevice(trigger._id);
+          console.log('Trigger ON:', message);
+        } else if (message.includes(trigger.triggerOff)) {
+          await trigger.updateOne({ status: false });
+          await controlDevice(trigger._id);
+          console.log('Trigger Off:', message);
         }
       }
     }

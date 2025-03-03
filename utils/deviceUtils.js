@@ -20,35 +20,44 @@ function sha256(message) {
   return hash.digest("hex");
 }
 
-async function controlDevice(deviceId) {
-  try {  
-    const device = await Devices.findById(deviceId);
-
-    if (!device) {
-      return { error: 'Device not found!' };
-    };
-
-    const devicesTriggers = await DevicesTriggers.find({deviceId: device._id}).sort({ createdAt: -1 });
-    const triggers = await Triggers.find({_id: devicesTriggers.map(dt => dt.triggerId)}, { status: 1, _id: 0 } ).sort({ createdAt: -1 });
+// change device status if good condition
+async function handleDeviceStatus(device) {
+  try {
+    const devicesTriggers = await DevicesTriggers.find({ deviceId: device._id });
+    const triggers = await Triggers.find({_id: devicesTriggers.map(dt => dt.triggerId)});
     const statuses = triggers.map(trigger => trigger.status);
     const status = statuses.length > 0 && statuses.every(s => s === true);
 
-    await handleStatusDevice(deviceId, status);
-    await device.updateOne({ status });
-
-    return device.status;
+    device.status === status ? console.log('Device status is the same') : await changeDeviceStatus(device._id, status);
   } catch (error) {
     console.error('Created Error:', error);
   }
 };
 
-async function handleStatusDevice(deviceId, status) {
+// Function to control device triggers and change device status
+async function controlDevice(triggerId) {
+  try {  
+    const devicesTriggers = await DevicesTriggers.find({triggerId: triggerId});
+    const devices = await Devices.find({_id: devicesTriggers.map(dt => dt.deviceId)} );
+
+    for (const device of devices) {
+      await handleDeviceStatus(device);
+    };
+
+  } catch (error) {
+    console.error('Created Error:', error);
+  }
+};
+
+// send API request to change device status
+async function changeDeviceStatus(deviceId, status) {
   // add device 
   const device = await Devices.findById(deviceId);
 
   if (!device) {
     return { error: 'Device not found!' };
   };
+  await device.updateOne({ status });
 
   return status;
 
@@ -108,6 +117,7 @@ async function handleStatusDevice(deviceId, status) {
   // mock device response
 };
 
+// get device status with API request
 async function statusDevice(deviceId) {
   const device = await Devices.findById(deviceId);
 
@@ -162,5 +172,5 @@ async function statusDevice(deviceId) {
   }
 };
 
-export { controlDevice, statusDevice, handleStatusDevice };
+export { controlDevice, statusDevice };
 

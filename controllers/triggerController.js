@@ -2,6 +2,7 @@ import Triggers from '../models/triggersModel.js';
 import User from '../models/userModel.js';
 import Devices from '../models/devicesModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
+import { getClient } from './telegramController.js'
 
 export async function show(req, res) {
     try {
@@ -67,7 +68,12 @@ export async function create(req, res) {
             return res.status(404).json({ error: 'User not found!' });
         }
 
-        const trigger = new Triggers({ ...req.body, userId: user._id });
+        const chanelId = await getChanelId(req.body.chanelName);
+        if (!chanelId) {
+            return res.status(404).json({ error: "Chanel not found or You doesnt connect to Telegram!" });
+        };
+
+        const trigger = new Triggers({ ...req.body, chanelId: chanelId, userId: user._id });
         console.log('Trigger:', trigger);
         await trigger.save();
         res.status(201).json(trigger);
@@ -157,3 +163,21 @@ export async function getFilteredTriggers(req, res) {
         res.status(500).json({ error: 'Failed to fetch triggers' });
     }
 }
+
+async function getChanelId(chanelName) {
+    try {
+        const client = await getClient();
+        if (!client) {
+            return null;
+        }
+
+        const chat = await client.getEntity(chanelName);
+        if (chat) {
+            return chat.id.value;
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error getting chanel id:', error);
+    }
+};
