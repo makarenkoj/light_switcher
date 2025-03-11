@@ -8,7 +8,7 @@ router.post('/sendCode', authenticateUser, sendCode);
 router.post('/signIn', authenticateUser, signIn);
 router.get('/checkSession', authenticateUser, checkSession);
 
-router.get('/:id', authenticateUser, show);
+router.get('/', authenticateUser, show);
 router.post('/', authenticateUser, create);
 router.put('/:id', authenticateUser, update);
 router.delete('/:id', authenticateUser, remove);

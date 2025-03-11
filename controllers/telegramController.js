@@ -17,8 +17,7 @@ let client;
 async function show(req, res) {
   try {
     const user = await User.findById(req.user._id);
-    const telegram = await Telegram.findById(req.params.id);
-
+    const telegram = await Telegram.findOne({ userId: user._id });
     if (!telegram) {
       return res.status(404).json({ error: 'Telegram not found' });
     };
@@ -26,6 +25,9 @@ async function show(req, res) {
     if (telegram.userId.toString() !== user._id.toString()) {
       return res.status(403).json({ error: 'You are not authorized to view this telegram!' });
     };
+
+    telegram.apiId = telegram.getDecryptedApiId();
+    telegram.apiHash = telegram.getDecryptedApiHash()
 
     res.status(200).json({ message: 'Telegram retrieved successfully', telegram });
   } catch (error) {
@@ -55,7 +57,7 @@ async function create(req, res) {
       return res.status(409).json({ error: `The value of the '${duplicateField}' field must be unique!`, field: duplicateField });
     };
     console.error('Create Error:', error);
-    res.status(422).json({ error: 'Telegram creation failed' });
+    res.status(422).json({ error: `Telegram creation failed: ${error}` });
   }
 };
 
