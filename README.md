@@ -4,6 +4,8 @@ Tuya (SmartLife) documentations: https://developer.tuya.com/en/docs/iot/device-i
 
 Tuya API: https://github.com/codetheweb/tuyapi
 
+Get telegram API keys: https://www.youtube.com/watch?v=8naENmP3rg4
+
 Telegram API (gramjs): https://github.com/gram-js/gramjs
 
 For start application:

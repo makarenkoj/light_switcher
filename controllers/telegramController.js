@@ -6,12 +6,111 @@ import Session from '../models/sessionModel.js';
 import { prepareSRP } from '../utils/srpHelper.js';
 import { sendAndHandleMessages } from '../utils/telegramUtils.js';
 import User from '../models/userModel.js';
+import Telegram from '../models/telegramModel.js';
 // import { message } from 'telegram-mtproto/lib/mtproto.js';
 
 const apiId = parseInt(process.env.API_ID);
 const apiHash = process.env.API_HASH;
 const INFO_CHANEL_NAME = process.env.INFO_CHANEL_NAME;
 let client;
+
+async function show(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    const telegram = await Telegram.findById(req.params.id);
+
+    if (!telegram) {
+      return res.status(404).json({ error: 'Telegram not found' });
+    };
+
+    if (telegram.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to view this telegram!' });
+    };
+
+    res.status(200).json({ message: 'Telegram retrieved successfully', telegram });
+  } catch (error) {
+    console.error('Show Error:', error);
+    res.status(422).json({ error: 'Failed to retrieve telegram!' });
+  }
+};
+
+async function create(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    const existingTelegram = await Telegram.findOne({ userId: user._id });
+    if (existingTelegram) {
+      return res.status(409).json({ error: 'Telegram already exists' });
+    };
+
+    const { apiId, apiHash, channel } = req.body;
+    if (!channel || !apiId || !apiHash) {
+      return res.status(422).json({ error: 'Missing required data' });
+    };
+
+    const telegram = await Telegram.create({ apiId, apiHash, channel, userId: user._id });
+    res.status(201).json({ message: 'Telegram created successfully', telegram });
+  } catch (error) {
+    if (error.code === 11000) {
+      const duplicateField = Object.keys(error.keyPattern)[0];
+      return res.status(409).json({ error: `The value of the '${duplicateField}' field must be unique!`, field: duplicateField });
+    };
+    console.error('Create Error:', error);
+    res.status(422).json({ error: 'Telegram creation failed' });
+  }
+};
+
+async function update(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    const { channel, api_id, api_hash } = req.body;
+    const telegram = await Telegram.find(req.params.id);
+
+    if (!telegram) {
+      return res.status(404).json({ error: 'Telegram not found' });
+    };
+
+    const updateFields = {};
+    if (channel) updateFields.channel = channel;
+    if (api_id) updateFields.api_id = api_id;
+    if (api_hash) updateFields.api_hash = api_hash;
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(422).json({ error: 'Nothing to update!' });
+    };
+
+    const updateData = await Telegram.findByIdAndUpdate(req.params.id, { $set: updateFields }, { new: true });
+
+    if (!updateData) {
+      return res.status(404).json({ error: 'Telegram not found!' });
+    }
+
+    res.status(200).json({ message: 'Telegram updated successfully', telegram: updateData });
+  } catch (error) {
+    console.error('Update Error:', error);
+    res.status(422).json({ error: 'Failed to update telegram!' });
+  }
+};
+
+async function remove(req, res) {
+  try {
+    const user = await User.findById(req.user._id);
+    const telegram = await Telegram.findById(req.params.id); 
+
+    if (!telegram) {
+      return res.status(404).json({ error: 'Telegram not found!' });
+    };
+
+    if (telegram.userId.toString() !== user._id.toString()) {
+      return res.status(403).json({ error: 'You are not authorized to delete this telegram!' });
+    };
+
+    await telegram.deleteOne();
+    res.status(200).json({ message: 'Telegram deleted successfully' });
+  } catch (error) {
+    console.error('Delete Error:', error);
+    res.status(422).json({ error: 'Failed to delete telegram!' });
+  };s
+};
 
 async function saveSession(userId) {
   const sessionString = client.session.save();
@@ -92,7 +191,7 @@ async function sendCode(req, res) {
     res.status(200).json({ phoneCodeHash: result.phoneCodeHash, phoneNumber, message: 'Code sent successfully' });
   } catch (error) {
     console.log('ERROR:', error); //remove
-    res.status(500).json({ error: 'Failed to send code' });
+    res.status(422).json({ error: 'Failed to send code' });
   }
 };
 
@@ -154,10 +253,10 @@ async function signIn(req, res) {
         res.status(200).json({ message: '2FA Sign-in successful', user: authResult.user });
       } catch (innerError) {
         console.error('2FA Error:', innerError);
-        res.status(500).json({ error: '2FA authentication failed' });
+        res.status(422).json({ error: '2FA authentication failed' });
       }
     } else {
-      res.status(500).json({ error: 'Sign-in failed' });
+      res.status(422).json({ error: 'Sign-in failed' });
     }
   }
 };
@@ -179,7 +278,7 @@ async function checkSession(req, res) {
 
   } catch (error) {
     console.error('Error checking session:', error);
-    res.status(500).json({ error: 'Failed to check session' });
+    res.status(422).json({ error: 'Failed to check session' });
   }
 };
 
@@ -200,4 +299,4 @@ async function getClient() {
   }
 }
 
-export { initializeClient, sendCode, signIn, checkSession, getClient };
+export { initializeClient, sendCode, signIn, checkSession, getClient, show, create, update, remove };

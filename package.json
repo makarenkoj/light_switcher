@@ -17,8 +17,9 @@
     "telegram-mtproto": "^1.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
-    "@babel/preset-env": "^7.26.0",
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@babel/register": "^7.25.9",
     "babel-jest": "^29.7.0",
     "dotenv": "^16.4.7",
     "jest": "^29.7.0",
