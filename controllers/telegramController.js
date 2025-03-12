@@ -9,9 +9,9 @@ import User from '../models/userModel.js';
 import Telegram from '../models/telegramModel.js';
 // import { message } from 'telegram-mtproto/lib/mtproto.js';
 
-const apiId = parseInt(process.env.API_ID);
-const apiHash = process.env.API_HASH;
-const INFO_CHANEL_NAME = process.env.INFO_CHANEL_NAME;
+// const apiId = parseInt(process.env.API_ID);
+// const apiHash = process.env.API_HASH;
+// const INFO_CHANEL_NAME = process.env.INFO_CHANEL_NAME;
 let client;
 
 async function show(req, res) {
@@ -62,28 +62,28 @@ async function create(req, res) {
 };
 
 async function update(req, res) {
+  console.log('Update:', req.body);
   try {
     const user = await User.findById(req.user._id);
-    const { channel, api_id, api_hash } = req.body;
-    const telegram = await Telegram.find(req.params.id);
-
+    const telegram = await Telegram.findOne({ userId: user._id });
     if (!telegram) {
+      console.error('Telegram not found');
       return res.status(404).json({ error: 'Telegram not found' });
     };
 
+    const { channel, apiId, apiHash } = req.body;
     const updateFields = {};
     if (channel) updateFields.channel = channel;
-    if (api_id) updateFields.api_id = api_id;
-    if (api_hash) updateFields.api_hash = api_hash;
+    if (apiId) updateFields.apiId = apiId;
+    if (apiHash) updateFields.apiHash = apiHash;
 
     if (Object.keys(updateFields).length === 0) {
       return res.status(422).json({ error: 'Nothing to update!' });
     };
 
-    const updateData = await Telegram.findByIdAndUpdate(req.params.id, { $set: updateFields }, { new: true });
-
+    const updateData = await Telegram.findByIdAndUpdate(telegram.id, updateFields, { new: true });
     if (!updateData) {
-      return res.status(404).json({ error: 'Telegram not found!' });
+      return res.status(404).json({ error: 'Telegram not updated!' });
     }
 
     res.status(200).json({ message: 'Telegram updated successfully', telegram: updateData });
@@ -114,6 +114,7 @@ async function remove(req, res) {
   };s
 };
 
+//////////////////////////////////////
 async function saveSession(userId) {
   const sessionString = client.session.save();
   await Session.findOneAndUpdate(
@@ -128,13 +129,22 @@ async function initializeClient(id) {
   const sessionData = await Session.findOne({ userId: user._id });
   const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
 
+  const telegram = await Telegram.findOne({ userId: user._id });
+  if (!telegram) {
+    return 'Telegram not found';
+  };
+
+  const apiId = telegram.getDecryptedApiId();
+  const apiHash = telegram.getDecryptedApiHash();
+  const INFO_CHANEL_NAME = telegram.channel;
+
   client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
   await client.connect();
   console.log('Telegram Client Initialized');
 
   if (await client.isUserAuthorized()) {
     console.log('Сесія успішно відновлена');
-    await sendAndHandleMessages(client, process.env.INFO_CHANEL_NAME, 
+    await sendAndHandleMessages(client, INFO_CHANEL_NAME, 
                                 "Сесія відновлена успішно", 
                                 "Користувач повернувся до системи.",
                                 user);
@@ -151,14 +161,23 @@ async function sendCode(req, res) {
     const user = await User.findById(req.user._id);
     const sessionData = await Session.findOne({ userId: user._id });
     const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
-  
+    const telegram = await Telegram.findOne({ userId: user._id });
+
+    if (!telegram) {
+      return 'Telegram not found';
+    };
+
+    const apiId = telegram.getDecryptedApiId();
+    const apiHash = telegram.getDecryptedApiHash();
+    const INFO_CHANEL_NAME = telegram.channel;
+
     client = new TelegramClient(stringSession, apiId, apiHash, { connectionRetries: 5 });
     await client.connect();
     console.log('Telegram Client Initialized');
   
     if (await client.isUserAuthorized()) {
       console.log('SESSION: Сесія успішно відновлена');
-      await sendAndHandleMessages(client, process.env.INFO_CHANEL_NAME, 
+      await sendAndHandleMessages(client, INFO_CHANEL_NAME, 
                                   "Сесія відновлена успішно", 
                                   "Користувач повернувся до системи.",
                                   user);

@@ -10,7 +10,7 @@ router.get('/checkSession', authenticateUser, checkSession);
 
 router.get('/', authenticateUser, show);
 router.post('/', authenticateUser, create);
-router.put('/:id', authenticateUser, update);
-router.delete('/:id', authenticateUser, remove);
+router.put('/', authenticateUser, update);
+router.delete('/', authenticateUser, remove);
 
 export default router;

@@ -69,6 +69,18 @@ telegramSchema.pre('save', async function (next) {
   next();
 });
 
+telegramSchema.pre('findOneAndUpdate', function (next) {
+  const update = this.getUpdate();
+  if (update.apiId) {
+    update.apiId = encrypt(update.apiId);
+  }
+  if (update.apiHash) {
+    update.apiHash = encrypt(update.apiHash);
+  }
+  this.setUpdate(update);
+  next();
+});
+
 telegramSchema.methods.getDecryptedApiId = function () {
   return decrypt(this.apiId);
 };
