@@ -1,6 +1,6 @@
 import express from 'express';
 import { changeStatus, getStatus, show, index, update, create, remove, triggers } from '../controllers/deviceController.js';
-import { createDeviceTrigger } from '../controllers/deviceTriggerController.js';
+import { createDeviceTrigger, deleteDeviceTrigger } from '../controllers/deviceTriggerController.js';
 import authenticateUser from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -14,5 +14,6 @@ router.put('/:id', authenticateUser, update);
 router.delete('/:id', authenticateUser, remove);
 router.get('/:id/triggers', authenticateUser, triggers);
 router.post('/:id/triggers', authenticateUser, createDeviceTrigger);
+router.delete('/:id/triggers', authenticateUser, deleteDeviceTrigger);
 
 export default router;

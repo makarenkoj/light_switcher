@@ -34,3 +34,35 @@ export async function createDeviceTrigger(req, res) {
         res.status(400).json({ error: error.message });
     }
 }
+
+export async function deleteDeviceTrigger(req, res) {
+    console.log('Delete deviceTrigger:', req.params, req.body);
+
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found!' });
+        }
+
+        const device = await Devices.findById(req.params.id);
+        if (!device) {
+            return res.status(404).json({ error: 'Device not found!' });
+        }
+
+        const trigger = await Triggers.findById(req.body.triggerId);
+        if (!trigger) {
+            return res.status(404).json({ error: 'Trigger not found!' });
+        }
+
+        const deviceTrigger = await DevicesTriggers.findOne({ deviceId: device._id, triggerId: trigger._id });
+        if (!deviceTrigger) {
+            return res.status(404).json({ error: 'Device Trigger not found!' });
+        }
+
+        await deviceTrigger.deleteOne();
+        res.status(200).json(deviceTrigger);
+    }
+    catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+}
