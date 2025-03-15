@@ -1,5 +1,6 @@
 import {controlDevice} from './deviceUtils.js';
 import Triggers from '../models/triggersModel.js';
+import { io } from '../app.js';
 
 async function sendAndHandleMessages(client, channelName, userMessage, channelMessage, user) {
   try {
@@ -32,10 +33,14 @@ async function handleTriggerInMessage(update) {
         if (message.includes(trigger.triggerOn)) {
           await trigger.updateOne({ status: true });
           await controlDevice(trigger._id);
+          const triggerId = trigger._id;
+          io.emit("triggerStatusUpdate", { triggerId, status: true });
           console.log('Trigger ON:', message);
         } else if (message.includes(trigger.triggerOff)) {
           await trigger.updateOne({ status: false });
           await controlDevice(trigger._id);
+          const triggerId = trigger._id;
+          io.emit("triggerStatusUpdate", { triggerId, status: false });
           console.log('Trigger Off:', message);
         }
       }
