@@ -5,6 +5,7 @@ const signMethod = "HMAC-SHA256";
 import Devices from '../models/devicesModel.js';
 import Triggers from '../models/triggersModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
+import { io } from '../app.js';
 
 // Function to generate HMAC-SHA256 signature
 function signHMAC(message, secretKey) {
@@ -58,6 +59,8 @@ async function changeDeviceStatus(deviceId, status) {
     return { error: 'Device not found!' };
   };
   await device.updateOne({ status });
+
+  io.emit("deviceStatusUpdate", { deviceId, status });
 
   return status;
 

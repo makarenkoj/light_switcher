@@ -5,17 +5,28 @@ import mongoose  from 'mongoose';
 import path from 'path';
 import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
+import { Server } from "socket.io";
+import { createServer } from "http";
 // import { initializeClient } from './controllers/telegramController.js';
 
 const app = express();
-const PORT = process.env.PORT || 0;
+const PORT = process.env.PORT || 5001;
+
+const server = createServer(app);
+
+export const io = new Server(server, {
+  cors: {
+    origin: process.env.CLIENT || 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+  },
+});
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Cors
 app.use(cors({
-  origin: process.env.CLIENT,
+  origin: process.env.CLIENT || 'http://localhost:3000',
   credentials: true,
 }));
 
@@ -53,8 +64,17 @@ app.use('/api/users', usersRoutes);
 app.use('/api/devices', deviceRoutes); // маршрути для керування пристроєм
 app.use('/api/triggers', triggerRoutes);
 
+// Налаштування WebSocket-з'єднань
+io.on('connection', (socket) => {
+  console.log(`🟢 New WebSocket connection: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`🔴 WebSocket disconnected: ${socket.id}`);
+  });
+});
+
 // Запуск сервера
-app.listen(PORT, async () => {
+server.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log('\nstart device\n');
   // await initializeClient();
