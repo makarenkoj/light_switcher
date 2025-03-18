@@ -77,6 +77,11 @@ io.on('connection', (socket) => {
 server.listen(PORT, async () => {
   console.log(`Server running at http://localhost:${PORT}`);
   console.log('\nstart device\n');
+
+  setTimeout(() => {
+    io.emit('serverStarted', { message: 'Server has started' });
+  }, 3000);
+
   // await initializeClient();
   console.log('\nstart success\n');
 });
