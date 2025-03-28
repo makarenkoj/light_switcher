@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
 import { Server } from "socket.io";
 import { createServer } from "http";
-// import { initializeClient } from './controllers/telegramController.js';
+import i18n, { t, i18nMiddleware } from './i18n.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -33,6 +33,7 @@ app.use(cors({
 // Middleware
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
+// app.use(i18nMiddleware);
 
 // Підключення до MongoDB
 mongoose
@@ -66,24 +67,20 @@ app.use('/api/triggers', triggerRoutes);
 
 // Налаштування WebSocket-з'єднань
 io.on('connection', (socket) => {
-  console.log(`🟢 New WebSocket connection: ${socket.id}`);
+  console.log(t('ws_connection', {socket_id: socket.id}));
 
   socket.on('disconnect', () => {
-    console.log(`🔴 WebSocket disconnected: ${socket.id}`);
+    console.log(t('ws_disconnected', {socket_id: socket.id}));
   });
 });
 
 // Запуск сервера
 server.listen(PORT, async () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log('\nstart device\n');
+  console.log(t('server_started', { port: PORT }));
 
   setTimeout(() => {
-    io.emit('serverStarted', { message: 'Server has started' });
+    io.emit('serverStarted', { message: t('server_io_message') });
   }, 3000);
-
-  // await initializeClient();
-  console.log('\nstart success\n');
 });
 
 export default app;

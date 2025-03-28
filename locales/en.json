@@ -1,0 +1,157 @@
+{
+  "translation": {
+    "welcome_message": "Welcome to our application!",
+    "message": "Server is running",
+    "server_started": "Server running at http://localhost: {{port}}"
+  },
+  "welcome_message": "Welcome to our application!",
+  "server_started": "\n*****\nServer running at http://localhost: {{port}}\n*****\n",
+  "server_io_message": "Server has started",
+  "ws_connection": "🟢 New WebSocket connection: {{socket_id}}",
+  "ws_disconnected": "🔴 WebSocket disconnected: {{socket_id}}",
+  "lang_detect": "Language detected as {{language}}",
+  "add_phone": "Could you please add a phone number to your account!",
+  "present": "present",
+  "missing": "missing",
+  "handle_message": "Hello!\n Session saved to file.",
+  "user": {
+    "errors": {
+      "delete": "Failed to delete user: {{error}}",
+      "update": "Failed to update user: {{error}}",
+      "email_exists": "Email already in use!",
+      "nothing_to_update": "Nothing to update!",
+      "retrieve_failed": "Failed to retrieve user: {{error}}",
+      "user_not_found": "User not found!",
+      "user_not_created": "User not created!",
+      "user_not_updated": "User not updated!",
+      "user_not_deleted": "User not deleted!",
+      "registration": "User registration failed: {{error}}",
+      "password_email": "Invalid email or password!",
+      "login_failed": "Login failed: {{error}}",
+      "logout": "Logout error: {{error}}"
+    },
+    "success": {
+      "deleted": "User deleted!",
+      "retrieved": "User retrieved successfully",
+      "user_created": "User created!",
+      "user_updated": "User updated!",
+      "user_deleted": "User deleted!",
+      "create": "User created successfully",
+      "login": "User logged in successfully",
+      "logout": "User logged out successfully"
+    }
+  },
+  "trigger": {
+    "errors": {
+      "delete": "Failed to delete trigger: {{error}}",
+      "update": "Failed to update trigger: {{error}}",
+      "nothing_to_update": "Nothing to update!",
+      "retrieve_failed": "Failed to retrieve trigger: {{error}}",
+      "trigger_not_found": "Trigger not found!",
+      "trigger_not_created": "Trigger not created!",
+      "trigger_not_updated": "Trigger not updated!",
+      "trigger_not_deleted": "Trigger not deleted!",
+      "triggers": "Triggers error: {{error}}",
+      "fetching": "Failed to fetch triggers: {{error}}"
+    },
+    "success": {
+      "deleted": "Trigger deleted!",
+      "retrieved": "Trigger retrieved successfully",
+      "trigger_created": "Trigger created!",
+      "trigger_updated": "Trigger updated!",
+      "trigger_deleted": "Trigger deleted!",
+      "fetched": "Triggers fetched successfully"
+    }
+  },
+  "device": {
+    "errors": {
+      "delete": "Failed to delete device: {{error}}",
+      "update": "Failed to update device: {{error}}",
+      "nothing_to_update": "Nothing to update!",
+      "retrieve_failed": "Failed to retrieve device: {{error}}",
+      "device_not_found": "Device not found!",
+      "device_not_created": "Device not created!",
+      "device_not_updated": "Device not updated!",
+      "device_not_deleted": "Device not deleted!",
+      "devices": "Devices error: {{error}}",
+      "not_found": "Device not found",
+      "alredy_exists_dt": "Device Trigger already exists!",
+      "dt_not_found": "Device trigger not found!",
+      "authorize": "You do not have permission to perform actions with this device!",
+      "id_required": "Device ID required!",
+      "id_exists": "A device with this ID already exists!"
+    },
+    "success": {
+      "deleted": "Device deleted!",
+      "retrieved": "Device retrieved successfully",
+      "device_created": "Device created!",
+      "device_updated": "Device updated!",
+      "device_deleted": "Device deleted!",
+      "device_is": "Device is {{status}}",
+      "on": "On",
+      "off": "Off"
+    }
+  },
+  "telegram": {
+    "exists": "Telegram already exists!",
+    "errors": {
+      "internal": "Internal server error",
+      "not_found": "Telegram not found",
+      "bad_request": "Bad request",
+      "unauthorized": "Unauthorized",
+      "forbidden": "Forbidden",
+      "conflict": "Conflict",
+      "unprocessable_entity": "Unprocessable entity",
+      "too_many_requests": "Too many requests",
+      "service_unavailable": "Service unavailable",
+      "authorized": "You are not authorized to perform this action!",
+      "channel_not_found": "Chanel not found or You doesnt connect to Telegram!",
+      "chanel_id": "Error getting chanel id: {{error}}",
+      "retrieve_failed": "Failed to retrieve Telegram: {{error}}",
+      "dublication": "The value of the {{duplicateField}} field must be unique!",
+      "create": "Telegram creation failed: {{error}}",
+      "nothing_to_update":"Nothing to update!",
+      "updated": "Telegram not updated!",
+      "failed_update": "Failed to update telegram: {{error}}",
+      "authorize_delete": "You do not have permission to delete this telegram!",
+      "delete": "Failed to delete telegram: {{error}}",
+      "session": "SESSION: sesion not restored!",
+      "checking_session": "Session checking error: {{error}}",
+      "sign_in": "Failed to sign in: {{error}}",
+      "2fa": "2FA authentication failed: {{error}}",
+      "authorize": "Telegram not authorize!"
+    },
+    "success": {
+      "channel_id": "Channel id retrieved successfully: {{channel_id}}",
+      "retrieved": "Telegram retrieved successfully",
+      "create": "Telegram created successfully",
+      "update": "Telegram updated successfully",
+      "delete": "Telegram deleted successfully",
+      "initialized": "Telegram Client Initialized",
+      "session": "Telegram session successfully restored",
+      "come_back_user": "The user has returned to the system.",
+      "sign_in": "Telegram sign in successfully",
+      "2fa": "2FA Sign-in successfully",
+      "authorized": "Telegram authorized!"
+    }
+  },
+  "errors": {
+    "internal": "Internal server error",
+    "not_found": "Resource not found",
+    "bad_request": "Bad request",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Forbidden",
+    "conflict": "Conflict",
+    "unprocessable_entity": "Unprocessable entity",
+    "too_many_requests": "Too many requests",
+    "service_unavailable": "Service unavailable",
+    "authorized": "You are not authorized to perform this action!",
+    "channel_not_found": "Chanel not found or You doesnt connect to Telegram!",
+    "chanel_id": "Error getting chanel id: {{error}}",
+    "missing_data": "Required data is missing",
+    "invalid_data": "Invalid data to perform the request!",
+    "retrieve_failed": "Failed to retrieve data: {{error}}",
+    "send_code": "Failed to send code: {{error}}",
+    "client": "Client error: {{error}}"
+  }
+}

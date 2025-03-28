@@ -3,36 +3,35 @@ import User from '../models/userModel.js';
 import Devices from '../models/devicesModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
 import { getClient } from './telegramController.js'
+import { t } from '../i18n.js';
 
 export async function show(req, res) {
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         const trigger = await Triggers.findById(req.params.id);
         if (!trigger) {
-            return res.status(404).json({ error: 'Trigger not found!' });
+            return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
         }
 
         if (trigger.userId.toString() !== user._id.toString()) {
-            return res.status(403).json({ error: 'You are not authorized to view this trigger!' });
+            return res.status(403).json({ error: t('errors.authorized') });
         }
 
         res.json(trigger);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(422).json({ error: error.message });
     }
 }
 
 export async function index(req, res) {
-    console.log('Index triggers:', req.body);
-
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         let { page = 1, limit = 9 } = req.query;
@@ -44,37 +43,34 @@ export async function index(req, res) {
         const totalTriggers = await Triggers.countDocuments({ userId: user._id });
 
         if (!triggers) {
-            return res.status(404).json({ error: 'Triggers not found!' });
+            return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
         };
 
-        res.status(200).json({message: 'Triggers retrieved successfully',
+        res.status(200).json({message: t('trigger.success.retrieved'),
             currentPage: page,
             totalPages: Math.ceil(totalTriggers / limit),
             totalTriggers,
             triggers
         });
     } catch (error) {
-        console.error('Triggers Error:', error);
-        res.status(422).json({ error: error.message });
+        console.error(t('trigger.errors.triggers', {error: error}));
+        res.status(422).json({ error: t('trigger.errors.triggers', {error: error.message}) });
     }
 }
 
 export async function create(req, res) {
-    console.log('Create trigger:', req.body);
-
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         const chanelId = await getChanelId(req.body.chanelName);
         if (!chanelId) {
-            return res.status(404).json({ error: "Chanel not found or You doesnt connect to Telegram!" });
+            return res.status(404).json({ error: t('errors.channel_not_found') });
         };
 
         const trigger = new Triggers({ ...req.body, chanelId: chanelId, userId: user._id });
-        console.log('Trigger:', trigger);
         await trigger.save();
         res.status(201).json(trigger);
     } catch (error) {
@@ -86,16 +82,16 @@ export async function update(req, res) {
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         const trigger = await Triggers.findById(req.params.id);
         if (!trigger) {
-            return res.status(404).json({ error: 'Trigger not found!' });
+            return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
         }
 
         if (trigger.userId.toString() !== user._id.toString()) {
-            return res.status(403).json({ error: 'You are not authorized to update this trigger!' });
+            return res.status(403).json({ error: t('errors.authorized') });
         }
 
         Object.assign(trigger, req.body);
@@ -107,8 +103,6 @@ export async function update(req, res) {
 }
 
 export async function remove(req, res) {
-    console.log('Remove trigger:', req.params);
-
     try {
         const user = await User.findById(req.user._id);
 
@@ -139,13 +133,13 @@ export async function getFilteredTriggers(req, res) {
         const user = await User.findById(req.user._id);
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         const device = await Devices.findById(req.query.deviceId);
 
         if (!device) {
-        return res.status(404).json({ error: 'Device not found!' });
+        return res.status(404).json({ error: t('device.errors.device_not_found') });
         };
 
         const linkedTriggers = await DevicesTriggers.find({ deviceId: device._id }).distinct('triggerId');
@@ -157,10 +151,10 @@ export async function getFilteredTriggers(req, res) {
 
         const triggers = await Triggers.find({ _id: { $nin: linkedTriggers }, userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
-        res.status(200).json({ message: 'Triggers fetched successfully', triggers });
+        res.status(200).json({ message: t('trigger..success.fetched'), triggers });
     } catch (error) {
-        console.error('Error fetching triggers:', error);
-        res.status(500).json({ error: 'Failed to fetch triggers' });
+        console.error(t('trigger.errorsfetching', {error: error}));
+        res.status(422).json({ error: t('trigger.errorsfetching', {error: error}) });
     }
 }
 
@@ -178,6 +172,6 @@ async function getChanelId(chanelName) {
             return null;
         }
     } catch (error) {
-        console.error('Error getting chanel id:', error);
+        console.error(t('Errors.chanel_id', {error: error}));
     }
 };
