@@ -118,7 +118,8 @@
       "checking_session": "Помилка перевірки сеансу: {{error}}",
       "sign_in": "Не вдалося увійти до Telegram: {{error}}",
       "2fa": "Помилка автентифікації 2FA: {{error}}",
-      "authorize": "Telegram не авторизовано!"
+      "authorize": "Telegram не авторизовано!",
+      "subscribe_channel": "Ви не підписані на канал!"
     },
     "success": {
       "channel_id": "Ідентифікатор каналу отримано успішно: {{channel_id}}",

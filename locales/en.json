@@ -119,7 +119,8 @@
       "checking_session": "Session checking error: {{error}}",
       "sign_in": "Failed to sign in: {{error}}",
       "2fa": "2FA authentication failed: {{error}}",
-      "authorize": "Telegram not authorize!"
+      "authorize": "Telegram not authorize!",
+      "subscribe_channel": "You are not subscribed to the channel!"
     },
     "success": {
       "channel_id": "Channel id retrieved successfully: {{channel_id}}",

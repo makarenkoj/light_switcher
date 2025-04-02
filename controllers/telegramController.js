@@ -309,4 +309,45 @@ async function getClient() {
   }
 }
 
-export { initializeClient, sendCode, signIn, checkSession, getClient, show, create, update, remove };
+async function joinChannel(channelName) {
+  try {
+    if (!client.isUserAuthorized()) {
+      return t('telegram.errors.authorized');
+    };
+
+    const result = await client.invoke(
+      new Api.channels.JoinChannel({
+        channel: channelName,
+      })
+    );
+
+    return result;
+  } catch (error) {
+    console.error(t('telegram.errors.channel_not_found', {error: error}));
+    return t('telegram.errors.channel_not_found', {error: error});
+  };
+};
+
+async function checkSubscription(channelName) {
+  try {
+    if (!client.isUserAuthorized()) {
+      return t('telegram.errors.authorized');
+    };
+
+    const me = await client.getMe()
+    const username = me.username;
+    await client.invoke(
+      new Api.channels.GetParticipant({
+        channel: channelName,
+        participant: username,
+        })
+    );
+
+      return true;
+  } catch (error) {
+      console.error(t('telegram.errors.subscribe_channel', {error: error}));
+      return false;
+  }
+}
+
+export { initializeClient, sendCode, signIn, checkSession, getClient, show, create, update, remove, joinChannel, checkSubscription };

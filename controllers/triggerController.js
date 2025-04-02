@@ -2,7 +2,7 @@ import Triggers from '../models/triggersModel.js';
 import User from '../models/userModel.js';
 import Devices from '../models/devicesModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
-import { getClient } from './telegramController.js'
+import { getClient, joinChannel } from './telegramController.js'
 import { t } from '../i18n.js';
 
 export async function show(req, res) {
@@ -167,11 +167,12 @@ async function getChanelId(chanelName) {
 
         const chat = await client.getEntity(chanelName);
         if (chat) {
+            await joinChannel(chat.username);
             return chat.id.value;
         } else {
             return null;
         }
     } catch (error) {
-        console.error(t('Errors.chanel_id', {error: error}));
+        console.error(t('errors.chanel_id', {error: error}));
     }
 };
