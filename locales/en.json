@@ -133,7 +133,8 @@
       "come_back_user": "The user has returned to the system.",
       "sign_in": "Telegram sign in successfully",
       "2fa": "2FA Sign-in successfully",
-      "authorized": "Telegram authorized!"
+      "authorized": "Telegram authorized!",
+      "join_channel": "Telegram joined the channel successfully {{channelName}}"
     }
   },
   "errors": {

@@ -277,10 +277,11 @@ async function signIn(req, res) {
 async function checkSession(req, res) {
   try {
     const isAuthorized = await client?.isUserAuthorized();
+    const admin = await User.findOne({ role: 'admin' });
 
     if (isAuthorized){
       res.status(200).json({ authorized: isAuthorized, message: t('telegram.success.authorized') });
-    } else if (await initializeClient(req.user._id)) {
+    } else if (await initializeClient(admin._id)) {
       res.status(200).json({ authorized: true, message: t('telegram.success.authorized') });
     } else {
       res.status(401).json({ message: t('telegram.errors.authorized'), authorized: false });
@@ -295,10 +296,11 @@ async function checkSession(req, res) {
 async function getClient() {
   try {
     const isAuthorized = await client?.isUserAuthorized();
+    const admin = await User.findOne({ role: 'admin' });
 
     if (isAuthorized){
       return client;
-    } else if (await initializeClient(req.user._id)) {
+    } else if (await initializeClient(admin._id)) {
       return client;
     } else {
       return null;
@@ -321,6 +323,9 @@ async function joinChannel(channelName) {
       })
     );
 
+    if (result) {
+      console.log(t('telegram.success.join_channel', {channelName: channelName}), result);
+    }
     return result;
   } catch (error) {
     console.error(t('telegram.errors.channel_not_found', {error: error}));
