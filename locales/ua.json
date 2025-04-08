@@ -132,7 +132,8 @@
       "come_back_user": "Користувач повернувся до системи.",
       "sign_in": "Telegram успішно підключено!",
       "2fa": "2FA успішно ввійшов",
-      "authorized": "Telegram авторизовано!"
+      "authorized": "Telegram авторизовано!",
+      "join_channel": "Telegram успішно приєднався до каналу {{channelName}}"
     }
   },
   "errors": {

@@ -1,14 +1,15 @@
-import jwt from 'jsonwebtoken';
+// import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import { initializeClient } from './telegramController.js';
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+// const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 import { t } from '../i18n.js';
+import { generateToken } from '../utils/tokenUtils.js';
 
 async function register(req, res) {
   try {
     const { email, password, phoneNumber } = req.body;
     const user = await User.create({ email, password, phoneNumber });
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
+    const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ message: t('user.success.create'), token, userId: user._id });
   } catch (error) {
@@ -28,7 +29,7 @@ async function login(req, res) {
     };
 
     const restoredSesion = await initializeClient(user._id);
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1d' });
+    const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ message: t('user.success.login'), token, restoredSesion: restoredSesion, userId: user._id });
   } catch (error) {

@@ -166,7 +166,7 @@ async function getChanelId(chanelName) {
         }
 
         const chat = await client.getEntity(chanelName);
-        if (chat) {
+        if (chat && chat.username) {
             await joinChannel(chat.username);
             return chat.id.value;
         } else {
