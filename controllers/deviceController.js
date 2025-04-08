@@ -3,42 +3,39 @@ import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
 import Triggers from '../models/triggersModel.js';
+import { t } from '../i18n.js';
 
 async function show(req, res) {
-  console.log('Show Device:', req.body);
-
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const device = await Devices.findById(req.params.id);
     if (!device) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
 
     if (device.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to view this device!' });
+      return res.status(403).json({ error: t('device.errors.authorize') });
     };
 
     const devicesTriggers = await DevicesTriggers.find({deviceId: device._id}).sort({ createdAt: -1 });
 
-    res.status(200).json({ message: 'Device retrieved successfully', device, devicesTriggers });
+    res.status(200).json({ message: t('device.success.retrieved'), device, devicesTriggers });
   } catch (error) {
-    console.error('Show Device Error:', error);
-    res.status(422).json({ error: 'Failed to retrieve device!' });
+    console.error(t('device.errors.retrieve_failed'), error);
+    res.status(422).json({ error: t('device.errors.retrieve_failed') });
   }
 };
 
 async function index(req, res) {
-  console.log('Index Device:', req.body);
-
   try {
     const user = await User.findById(req.user._id);
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     let { page = 1, limit = 9 } = req.query;
@@ -50,64 +47,61 @@ async function index(req, res) {
     const totalDevices = await Devices.countDocuments({ userId: user._id });
 
     if (!devices) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
   
-    res.status(200).json({message: 'Device retrieved successfully',
+    res.status(200).json({message: t('device.success.retrieved'),
                           currentPage: page,
                           totalPages: Math.ceil(totalDevices / limit),
                           totalDevices,
                           devices
     });
   } catch (error) {
-    console.error('Devices Error:', error);
-    res.status(422).json({ error: 'Failed to find devices!' });
+    console.error(t('device.erors.device_not_found'), error);
+    res.status(422).json({ error: t('device.erors.device_not_found') });
   }
 }
 
 async function create(req, res) {
-  console.log('Create Device:', req.body);
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const { name, deviceId, accessId, secretKey } = req.body;
     if (!deviceId) {
-      return res.status(400).json({ error: 'Device ID is required!' });
+      return res.status(400).json({ error: t('device.errors.id_required') });
     };
 
     const existingDevice = await Devices.findOne({ deviceId });
     if (existingDevice) {
-      return res.status(409).json({ error: 'Device with this ID already exists!' });
+      return res.status(409).json({ error: t('device.errors.id_exists') });
     };
 
     const device = await Devices.create({ name, deviceId, accessId, secretKey, userId: user._id });
 
-    res.status(201).json({ message: 'Device created successfully', device: {device} });
+    res.status(201).json({ message: t('device.success.device_created'), device: {device} });
   } catch (error) {
-    console.error('Created Error:', error);
-    res.status(422).json({ error: 'Failed to create device!' });
+    console.error(t('device.errors.device_not_created'), error);
+    res.status(422).json({ error: t('device.errors.device_not_created') });
   }
 };
 
 async function update(req, res) {
-  console.log('Update Device:', req.body);
-
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const device = await Devices.findById(req.params.id);
     if (!device) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
 
     if (device.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+      return res.status(403).json({ error: t('device.errors.authorize') });
     };
 
     const { name, deviceId, accessId, secretKey } = req.body;
@@ -119,7 +113,7 @@ async function update(req, res) {
     if (secretKey) updateFields.secretKey = secretKey;
 
     if (Object.keys(updateFields).length === 0) {
-      return res.status(400).json({ error: 'Nothing to update!' });
+      return res.status(400).json({ error: t('device.errors.nothing_to_update') });
     }
 
     const updatedDevice = await Devices.findByIdAndUpdate(
@@ -129,57 +123,53 @@ async function update(req, res) {
     );
 
     if (!updatedDevice) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     }
-    res.status(200).json({ message: 'Device updated successfully', updatedDevice });
+    res.status(200).json({ message: t('device.success.device_updated'), updatedDevice });
   } catch (error) {
-    console.error('Created Error:', error);
-    res.status(422).json({ error: 'Failed to update device!' });
+    console.error(t('device.errors.device_not_updated'), error);
+    res.status(422).json({ error: t('device.errors.device_not_updated') });
   }
 };
 
 async function remove(req, res) {
-  console.log('Update Device:', req.body);
-
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const device = await Devices.findById(req.params.id);
     if (!device) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
 
     if (device.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+      return res.status(403).json({ error: t('device.errors.authorize') });
     };
 
     await device.deleteOne();
-    res.status(200).json({ message: 'Device deleted successfully' });
+    res.status(200).json({ message: t('device.success.device_deleted') });
   } catch (error) {
-    console.error('Remove Error:', error);
-    res.status(422).json({ error: 'Failed to delete device!' });
+    console.error(t('device.errors.device_not_deleted'), error);
+    res.status(422).json({ error: t('device.errors.device_not_deleted') });
   }
 };
 
 async function getStatus(req, res) {
-  console.log('Get status Device:', req.body);
-
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const device = await Devices.findById(req.params.id);
     if (!device) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
 
     if (device.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+      return res.status(403).json({ error: t('device.errors.authorize') });
     };
 
     const deviceStatus = await statusDevice(device.deviceId, device.accessId, device.secretKey);
@@ -193,7 +183,7 @@ async function getStatus(req, res) {
 
     await device.updateOne({ status });
 
-    res.status(200).json({ message: `Device status retrieved  successfull`, status: status });
+    res.status(200).json({ message: t('device.success.retrieved'), status: status });
   }
   catch (error) {
     res.status(422).json({ error: error.message });
@@ -206,16 +196,16 @@ async function changeStatus(req, res) {
   try {
     const user = await User.findById(req.user._id);
     if (!user) {
-      return res.status(404).json({ error: 'User not found!' });
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
     const device = await Devices.findById(req.params.id);
     if (!device) {
-      return res.status(404).json({ error: 'Device not found!' });
+      return res.status(404).json({ error: t('device.errors.device_not_found') });
     };
 
     if (device.userId.toString() !== user._id.toString()) {
-      return res.status(403).json({ error: 'You are not authorized to delete this device!' });
+      return res.status(403).json({ error: t('device.errors.authorize') });
     };
 
     const { status } = req.body;
@@ -223,7 +213,7 @@ async function changeStatus(req, res) {
 
     await device.updateOne({ status });
 
-    res.status(200).json({ message: `Device is ${status ? 'ON' : 'OFF'}`, body: deviceData });
+    res.status(200).json({ message: t('device.success.device_is', {status: status ? t('device.success.on') : t('device.success.off')}), body: deviceData });
   }
   catch (error) {
     res.status(422).json({ error: error.message });
@@ -231,12 +221,10 @@ async function changeStatus(req, res) {
 }
 
 async function triggers(req, res) {
-    console.log('Index triggers:', req.params);
-
     try {
         const user = await User.findById(req.user._id);
         if (!user) {
-            return res.status(404).json({ error: 'User not found!' });
+            return res.status(404).json({ error: t('user.errors.user_not_found') });
         }
 
         let { page = 1, limit = 9 } = req.query;
@@ -246,29 +234,29 @@ async function triggers(req, res) {
         
         const device = await Devices.findById(req.params.id);
         if (!device) {
-          return res.status(404).json({ error: 'Device not found!' });
+          return res.status(404).json({ error: t('device.errors.device_not_found') });
         }
 
         const devicesTriggers = await DevicesTriggers.find({deviceId: device._id }).sort({ createdAt: -1 });
         if (!devicesTriggers) {
-          return res.status(404).json({ error: 'Devices Triggers not found!' });
+          return res.status(404).json({ error: t('device.errors.dt_not_found') });
         };
 
         const triggers = await Triggers.find({ userId: user._id, _id: { $in: devicesTriggers.map(dt => dt.triggerId) } }).sort({ createdAt: -1 }).skip(skip).limit(limit);
         if (!triggers) {
-          return res.status(404).json({ error: 'Triggers not found!' });
+          return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
         };
 
         const totalTriggers = await Triggers.countDocuments({ userId: user._id, _id: { $in: devicesTriggers.map(dt => dt.triggerId) } });
 
-        res.status(200).json({message: 'Triggers retrieved successfully',
+        res.status(200).json({message: t('trigger.success.retrieved'),
             currentPage: page,
             totalPages: Math.ceil(totalTriggers / limit),
             totalTriggers,
             triggers
         });
     } catch (error) {
-        console.error('Triggers Error:', error);
+        console.error(t('trigger.errors.triggers', {error: error}));
         res.status(422).json({ error: error.message });
     }
 }
