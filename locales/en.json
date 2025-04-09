@@ -28,7 +28,15 @@
       "registration": "User registration failed: {{error}}",
       "password_email": "Invalid email or password!",
       "login_failed": "Login failed: {{error}}",
-      "logout": "Logout error: {{error}}"
+      "logout": "Logout error: {{error}}",
+      "email_taken": "Email already taken!",
+      "phone_taken": "Phone number already taken!",
+      "email_phone_taken": "Email and phone number already taken!",
+      "validation": "Validation error: {{error}}",
+      "password_required": "Password is required!",
+      "email_required": "Email is required!",
+      "phone_required": "Phone number is required!",
+      "phone_validation": "{{number}} is not a valid phone number!"
     },
     "success": {
       "deleted": "User deleted!",

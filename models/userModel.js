@@ -1,18 +1,27 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import { t } from '../i18n.js';
 
 const userSchema = new mongoose.Schema({
   email: { 
     type: String, 
     required: true, 
-    unique: true 
+    unique: true
   },
   password: { 
     type: String, 
-    required: true 
+    required: [true, t('user.errors.password_required')],
   },
   phoneNumber: {
-    type: String
+    type: String,
+    required: [true, t('user.errors.phone_required')],
+    unique: true,
+    validate: {
+      validator: function(v) {
+        return /\+?[0-9]{7,15}/.test(v);
+      },
+      message: props => t('user.errors.phone_validation', {number: props.value})
+    }
   },
   role: {
     type: String,

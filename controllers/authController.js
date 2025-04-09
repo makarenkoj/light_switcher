@@ -13,8 +13,27 @@ async function register(req, res) {
 
     res.status(201).json({ message: t('user.success.create'), token, userId: user._id });
   } catch (error) {
+    if (error.code === 11000) {
+      if (error.keyPattern.email) {
+        console.error(t('user.errors.email_taken'));
+        return res.status(409).json({ error: t('user.errors.email_taken') });
+      }
+      if (error.keyPattern.phoneNumber) {
+        console.error(t('user.errors.phone_taken'));
+        return res.status(409).json({ error: t('user.errors.phone_taken') });
+      }
+      console.error(t('user.errors.email_phone_taken'));
+      return res.status(409).json({ error: t('user.errors.email_phone_taken') });
+    }
+
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(err => err.message);
+      console.error(t('user.errors.validation', {error: errors.join(', ')}));
+      return res.status(422).json({ error: t('user.errors.validation', {error: errors.join(', ')}) });
+    }
+
     console.error(t('user.errors.registration', {error: error}) );
-    res.status(500).json({ error: t('user.errors.registration', {error: error}) });
+    res.status(422).json({ error: t('user.errors.registration', {error: error.message}) });
   }
 };
 
