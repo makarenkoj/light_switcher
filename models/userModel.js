@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: function(v) {
-        return /\+?[0-9]{7,15}/.test(v);
+        return /^\+?[0-9]{7,15}$/.test(v);
       },
       message: props => t('user.errors.phone_validation', {number: props.value})
     }
