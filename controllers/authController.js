@@ -41,13 +41,21 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    
+    let restoredSesion = false;
+
     if (!user || !(await user.comparePassword(password))) {
       console.error(t('user.errors.password_email'))
       return res.status(401).json({ error: t('user.errors.password_email') });
     };
 
-    const restoredSesion = await initializeClient(user._id);
+    const admin = await User.findOne({ role: 'admin' });
+
+    if (admin) {
+      restoredSesion = await initializeClient(admin._id);
+    } else {
+      console.error(t('user.errors.admin_not_found'));
+    };
+
     const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ message: t('user.success.login'), token, restoredSesion: restoredSesion, userId: user._id });
