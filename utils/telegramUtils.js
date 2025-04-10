@@ -12,6 +12,7 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
         const message = update.message.message || update.message;
 
         await handleTriggerInMessage(update);
+        console.log('channel:', update);
         console.log('Вхідне повідомлення:', message);
       }
     });

@@ -7,11 +7,12 @@ import bodyParser from 'body-parser';
 import { fileURLToPath } from 'url';
 import { Server } from "socket.io";
 import { createServer } from "http";
-import i18n, { t, i18nMiddleware } from './i18n.js';
+import { t } from './i18n.js';
+import User from './models/userModel.js';
+import { initializeClient } from './controllers/telegramController.js';
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-
 const server = createServer(app);
 
 export const io = new Server(server, {
@@ -78,8 +79,17 @@ io.on('connection', (socket) => {
 server.listen(PORT, async () => {
   console.log(t('server_started', { port: PORT }));
 
-  setTimeout(() => {
+  const admin = await User.findOne({ role: 'admin' });
+
+  setTimeout(async () => {
     io.emit('serverStarted', { message: t('server_io_message') });
+
+    if (admin) {
+      await initializeClient(admin._id);
+    } else {
+      console.error(t('user.errors.admin_not_found'));
+    };
+
   }, 3000);
 });
 
