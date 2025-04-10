@@ -71,6 +71,7 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
     client.addEventHandler((update) => {
       if (update.message) {
         const message = update.message.message;
+        console.log('channel:', update)
         console.log('Вхідне повідомлення:', message);
       }
     });
@@ -137,7 +138,7 @@ const client = new TelegramClient(stringSession, apiId, apiHash, {connectionRetr
             res.status(200).json({ message: "Code sent successfully.", phoneNumber, phoneCodeHash: phoneCodeHash });
         } catch (error) {
             console.error("Error sending code:", error);
-            res.status(500).json({ error: "Failed to send code." });
+            res.status(422).json({ error: "Failed to send code." });
         }
     });
     
