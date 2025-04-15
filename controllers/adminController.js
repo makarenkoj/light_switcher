@@ -1,19 +1,19 @@
-// import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import { initializeClient } from './telegramController.js';
-// const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 import { t } from '../i18n.js';
 import { generateToken } from '../utils/tokenUtils.js';
-import { io } from '../app.js';
 
 async function register(req, res) {
   try {
+    const adminEmail = process.env.ADMIN_EMAIL;
     const { email, password, phoneNumber } = req.body;
-    const user = await User.create({ email, password, phoneNumber });
-    const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    if (email != adminEmail) {
+      return res.status(403).json({ error: t('user.errors.admin_email') });
+    }
+    const user = await User.create({ email, password, phoneNumber, role: 'admin' });
+    const token = generateToken(user);
 
     res.status(201).json({ message: t('user.success.create'), token, userId: user._id });
-    io.emit('userNotification', { message: t('user.success.new', {user: user}) });
   } catch (error) {
     if (error.code === 11000) {
       if (error.keyPattern.email) {
@@ -43,25 +43,20 @@ async function login(req, res) {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    let restoredSesion = false;
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({ error: t('user.errors.not_admin') });
+    };
 
     if (!user || !(await user.comparePassword(password))) {
       console.error(t('user.errors.password_email'))
       return res.status(401).json({ error: t('user.errors.password_email') });
     };
 
-    const admin = await User.findOne({ role: 'admin' });
-
-    if (admin) {
-      restoredSesion = await initializeClient(admin._id);
-    } else {
-      console.error(t('user.errors.admin_not_found'));
-    };
-
-    const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
+    const restoredSesion = await initializeClient(user._id);
+    const token = generateToken(user);
 
     res.status(200).json({ message: t('user.success.login'), token, restoredSesion: restoredSesion, userId: user._id });
-    io.emit('userNotification', { message: t('user.success.login_new', {user: user}) });
   } catch (error) {
     console.error(t('user.errors.login_failed', {error: error}));
     res.status(422).json({ error: t('user.errors.login_failed', {error: error}) });
@@ -71,7 +66,6 @@ async function login(req, res) {
 async function logout(req, res) {
   try {
     res.status(200).json({ message: t('user.success.logout') });
-    io.emit('userNotification', { message: t('user.success.logout') });
   } catch (error) {
     console.error(t('user.errors.logout', {error: error}));
     res.status(422).json({ error: t('user.errors.logout', {error: error})});

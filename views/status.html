@@ -1,24 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Light Svitcher</title>
-        <link rel="stylesheet" href="/css/style.css">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Status Page</title>
+        <link rel="stylesheet" href="/css/style.css" />
     </head>
     <body>
-        <div class="service center">
-            <div class="title degraded">
-                Light Svitcher
+        <!-- HEADER -->
+        <header>
+            <div class="logo"><strong data-i18n="appName">Light Switcher Admin Panel</strong></div>
+            <div class="nav-buttons">
+                <a class="header-btn" id="logout" data-i18n="logout">Logout</a>
+                <button class="lang-btn" data-lang="ua">UA</button>
+                <button class="lang-btn" data-lang="en">EN</button>
             </div>
-            <div class="container">
-                <div class="login">
-                    <h1>Telegram status page</h1>
-                    <button id="myToggleButton" class="toggle-button">Вимкнено</button>
-                    <p id="message"></p>
+        </header>
+
+        <!-- MAIN -->
+        <div class="container">
+            <div class="form-box">
+                <h2 id="message"><h2/>
+
+                <!-- Сповіщення -->
+                <div class="notifications">
+                    <div class="notification-header">
+                        <span>🔔</span>
+                        <span id="notification-count" class="badge">0</span>
+                    </div>
+                    <div class="notification-list" id="notification-list">
+                        <p class="empty" data-i18n="noNotifications">Немає сповіщень</p>
+                    </div>
                 </div>
             </div>
         </div>
+        <!-- FOOTER -->
+        <footer>
+            &copy; 2025 <span data-i18n="appName">Light Switcher</span>
+        </footer>
         <script src="/js/status.js"></script>
+        <script src="/js/i18n.js"></script>
+        <script src="/js/lang-switcher.js"></script>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/js/notify.js"></script>
     </body>
 </html>
