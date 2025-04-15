@@ -36,7 +36,9 @@
       "password_required": "Password is required!",
       "email_required": "Email is required!",
       "phone_required": "Phone number is required!",
-      "phone_validation": "{{number}} is not a valid phone number!"
+      "phone_validation": "{{number}} is not a valid phone number!",
+      "admin_email": "Its not Admin email!",
+      "not_admin": "This user is not an admin!"
     },
     "success": {
       "deleted": "User deleted!",

@@ -12,7 +12,11 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
         const message = update.message.message || update.message;
 
         await handleTriggerInMessage(update);
-        console.log('channel:', update);
+
+        if (update.message.peerId.channelId.value) {
+          console.log('ID каналу:', update.message.peerId.channelId.value);
+        };
+
         console.log('Вхідне повідомлення:', message);
       }
     });
