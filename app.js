@@ -51,6 +51,7 @@ import signUpRoutes from './routes/signUp.js';
 import usersRoutes from './routes/users.js';
 import deviceRoutes from './routes/device.js';
 import triggerRoutes from './routes/trigger.js';
+import adminRoutes from './routes/admin.js';
 // import deviceTriggerRoutes from './routes/deviceTrigger.js';
 
 // Використання маршрутів
@@ -58,6 +59,7 @@ import triggerRoutes from './routes/trigger.js';
 app.use('/', indexRoutes);           // Головна сторінка
 app.use('/', statusRoutes);          // Сторінка статусу
 app.use('/', signUpRoutes);          // Сторінка sign upa
+app.use('/admin', adminRoutes);      // Сторінка адміна
 
 // api
 app.use('/api/telegram', telegramRoutes);

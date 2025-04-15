@@ -2,6 +2,7 @@ import User from '../models/userModel.js';
 import Devices from '../models/devicesModel.js';
 import Session from '../models/sessionModel.js';
 import { t } from '../i18n.js';
+import { io } from '../app.js';
 
 async function show(req, res) {
   try {
@@ -56,6 +57,7 @@ async function remove(req, res) {
     await user.deleteOne();
 
     res.status(200).json({ message: t('user.success.deleted') });
+    io.emit('userNotification', { message: t('user.success.remove', {user: user}) });
   } catch (error) {
     console.error(t('user.errors.delete', {error: error}));
     res.status(422).json({ error: t('user.errors.user_not_deleted') });
