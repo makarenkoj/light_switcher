@@ -117,3 +117,31 @@ document.getElementById("code-form").addEventListener("submit", async (e) => {
     alert(error.message);
   }
 });
+
+document.getElementById("logout").addEventListener("click", async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('token');
+
+  try {
+    const response = await fetch("/admin/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", 'Authorization': `Bearer ${token}` },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      localStorage.removeItem('step');
+      localStorage.removeItem('phoneNumber');
+      localStorage.removeItem('phoneCodeHash');
+      localStorage.removeItem('authorized');
+      localStorage.removeItem('token');
+      window.location.href = '/login'
+    } else {
+      document.getElementById("message").innerText = data.error;
+      throw new Error(data.error)
+    }
+  } catch (error) {
+    alert(error.message);
+  }
+});
