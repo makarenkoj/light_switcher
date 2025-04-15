@@ -4,6 +4,7 @@ import { initializeClient } from './telegramController.js';
 // const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 import { t } from '../i18n.js';
 import { generateToken } from '../utils/tokenUtils.js';
+import { io } from '../app.js';
 
 async function register(req, res) {
   try {
@@ -12,6 +13,7 @@ async function register(req, res) {
     const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(201).json({ message: t('user.success.create'), token, userId: user._id });
+    io.emit('userNotification', { message: t('user.success.new', {user: user}) });
   } catch (error) {
     if (error.code === 11000) {
       if (error.keyPattern.email) {
@@ -59,6 +61,7 @@ async function login(req, res) {
     const token = generateToken(user); //jwt.sign({ userId: user._id, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
 
     res.status(200).json({ message: t('user.success.login'), token, restoredSesion: restoredSesion, userId: user._id });
+    io.emit('userNotification', { message: t('user.success.login_new', {user: user}) });
   } catch (error) {
     console.error(t('user.errors.login_failed', {error: error}));
     res.status(422).json({ error: t('user.errors.login_failed', {error: error}) });
@@ -68,6 +71,7 @@ async function login(req, res) {
 async function logout(req, res) {
   try {
     res.status(200).json({ message: t('user.success.logout') });
+    io.emit('userNotification', { message: t('user.success.logout') });
   } catch (error) {
     console.error(t('user.errors.logout', {error: error}));
     res.status(422).json({ error: t('user.errors.logout', {error: error})});

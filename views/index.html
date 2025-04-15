@@ -1,43 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Light Svitcher</title>
-        <link rel="stylesheet" href="/css/style.css">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Status Page</title>
+        <link rel="stylesheet" href="/css/style.css" />
     </head>
     <body>
-        <div class="service center">
-            <div class="title degraded">
-                Light Svitcher
+        <!-- HEADER -->
+        <header>
+            <div class="logo"><strong data-i18n="appName">Light Switcher Admin Panel</strong></div>
+            <div class="nav-buttons">
+                <a class="header-btn" id="logout" data-i18n="logout">Logout<a/>
+                <button class="lang-btn" data-lang="ua">UA</button>
+                <button class="lang-btn" data-lang="en">EN</button>
             </div>
-            <div class="container">
-                <div class="login">
-                    <h1>Telegram Login</h1>
-
-                    <p id="message"></p>
-                    <!-- Форма для номера телефону -->
-                    <div id="step-1">
-                      <h2>Step 1: Enter Phone Number</h2>
-                      <form id="phone-form">
-                        <input type="text" id="phone" placeholder="Enter your phone number" required>
-                        <button type="submit">Send SMS</button>
-                      </form>
-                      <p id="phone-message"></p>
-                    </div>
-                  
-                    <!-- Форма для SMS-коду -->
-                    <div id="step-2" style="display:none;">
-                      <h2>Step 2: Enter SMS Code</h2>
-                      <form id="code-form">
-                        <input type="text" id="code" placeholder="Enter SMS code" required>
-                        <button type="submit">Verify Code</button>
-                      </form>
-                      <p id="code-message"></p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        </header>
+        <!-- MAIN -->
+        <div class="container">
+          <div class="form-box">
+            <h2 data-i18n="telegram_authorization">Telegram Authorization</h2>
+            <h2 id="message"><h2/>
+              <!-- Форма для номера телефону -->
+              <div id="step-1">
+                <h2 data-i18n="step1">Step 1: Enter Phone Number</h2>
+                <form id="phone-form">
+                  <input type="text" id="phone" placeholder="Enter your phone number" required>
+                  <button type="submit" data-i18n="submit">Send SMS</button>
+                </form>
+                <p id="phone-message"></p>
+              </div>
+              <!-- Форма для SMS-коду -->
+              <div id="step-2" style="display:none;">
+                <h2 data-i18n="step2">Step 2: Enter SMS Code</h2>
+                <form id="code-form">
+                  <input type="text" id="code" placeholder="Enter SMS code" required>
+                  <button type="submit" data-i18n="submit">Verify Code</button>
+                </form>
+                <p id="code-message"></p>
+              </div>
+          </div>
+      </div>
+        <!-- FOOTER -->
+        <footer>
+            &copy; 2025 <span data-i18n="appName">Light Switcher</span>
+        </footer>
         <script src="/js/script.js"></script>
+        <script src="/js/i18n.js"></script>
+        <script src="/js/lang-switcher.js"></script>
     </body>
 </html>

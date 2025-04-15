@@ -1,8 +1,8 @@
 "use strict";
-
+// Todo: Add language support, fix the alert message
 document.addEventListener("DOMContentLoaded", async () => {
   const token = localStorage.getItem('token');
-console.log('TOKEN script:', token);
+
   if (!token) {
     window.location.href = '/login'
     localStorage.removeItem('phoneNumber');

@@ -48,7 +48,11 @@
       "user_deleted": "User deleted!",
       "create": "User created successfully",
       "login": "User logged in successfully",
-      "logout": "User logged out successfully"
+      "logout": "User logged out successfully",
+      "new": "New user created! {{user}}",
+      "login_new": "User logged in successfully {{user}}",
+      "logout_user": "User logged out successfully {{user}}",
+      "remove": "User removed successfully {{user}}"
     }
   },
   "trigger": {

@@ -15,9 +15,12 @@ async function sendAndHandleMessages(client, channelName, userMessage, channelMe
 
         if (update.message.peerId.channelId.value) {
           console.log('ID каналу:', update.message.peerId.channelId.value);
+          io.emit('notification', { message: `🟢 ID: ${update.message.peerId.channelId.value} \n Вхідне повідомлення: ${message}` });
+          console.log('Вхідне повідомлення:', message);
+        } else {
+          io.emit('notification', { message: `🟢 Вхідне повідомлення: ${message}` });
+          console.log('Вхідне повідомлення:', message);
         };
-
-        console.log('Вхідне повідомлення:', message);
       }
     });
 

@@ -7,7 +7,11 @@ const translations = {
     login: "Login",
     signup: "Signup",
     logout: "Logout",
-    appName: "Light Switcher Admin Panel"
+    appName: "Light Switcher Admin Panel",
+    noNotifications: "No Notifications",
+    telegram_authorization: "Telegram Authorization",
+    step1: "Step 1: Enter your phone number",
+    step2: "Step 2: Enter the confirmation code"
   },
   ua: {
     title: "Реєстрація",
@@ -17,7 +21,11 @@ const translations = {
     login: "Увійти",
     signup: "Реєстрація",
     logout: "Вийти",
-    appName: "Панель адміністратора Light Switcher"
+    appName: "Панель адміністратора Light Switcher",
+    noNotifications: "Немає сповіщень",
+    telegram_authorization: "Авторизація Telegram",
+    step1: "Крок 1: Введіть номер телефону",
+    step2: "Крок 2: Введіть код підтвердження"
   }
 };
 
