@@ -6,7 +6,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 COPY locales /usr/src/app/locales
 
-RUN npm install
+RUN npm ci --omit=dev 
 
 COPY . .
 
