@@ -11,12 +11,10 @@ services:
       - .env.production
     environment:
       - NODE_ENV=production
-    volumes:
-      - .:/usr/src/app
 
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.client
+      dockerfile: Dockerfile
     ports:
       - "80:80"
