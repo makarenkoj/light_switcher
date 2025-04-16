@@ -10,6 +10,8 @@ import { createServer } from "http";
 import { t } from './i18n.js';
 import User from './models/userModel.js';
 import { initializeClient } from './controllers/telegramController.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
