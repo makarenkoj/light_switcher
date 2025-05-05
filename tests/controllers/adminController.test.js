@@ -3,7 +3,7 @@ import User from '../../models/userModel';
 import { initializeClient } from '../../controllers/telegramController';
 import { t } from '../../i18n';
 import { generateToken } from '../../utils/tokenUtils';
-import bcrypt from 'bcrypt';
+// import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
 afterAll(async () => {
@@ -64,7 +64,7 @@ describe('AdminController', () => {
       generateToken.mockReset();
     });
 
-    test('повинен успішно зареєструвати адміністратора з правильною поштою', async () => {
+    test('must successfully register an administrator with the correct email', async () => {
       const mockUser = { _id: 'mockUserId' };
       User.create.mockResolvedValue(mockUser);
       generateToken.mockReturnValue('mockToken');
@@ -87,7 +87,7 @@ describe('AdminController', () => {
       });
     });
 
-    test('повинен повернути помилку 403, якщо пошта не є поштою адміністратора', async () => {
+    test('should return a 403 error if the email is not an administrator email', async () => {
       mockReq.body = { email: 'wrong@example.com', password: 'password123', phoneNumber: '1234567890' };
 
       await register(mockReq, mockRes);
@@ -98,7 +98,7 @@ describe('AdminController', () => {
       expect(generateToken).not.toHaveBeenCalled();
     });
 
-    test('повинен повернути помилку 409 при дублікаті email', async () => {
+    test('should return a 409 error for duplicate email', async () => {
       const error = { code: 11000, keyPattern: { email: 1 } };
       User.create.mockRejectedValue(error);
       mockReq.body = { email: adminEmail, password: 'password123', phoneNumber: '1234567890' };
@@ -109,7 +109,7 @@ describe('AdminController', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ error: 'user.errors.email_taken' });
     });
 
-    test('повинен повернути помилку 409 при дублікаті phoneNumber', async () => {
+    test('should return a 409 error on duplicate phoneNumber', async () => {
       const error = { code: 11000, keyPattern: { phoneNumber: 1 } };
       User.create.mockRejectedValue(error);
       mockReq.body = { email: adminEmail, password: 'password123', phoneNumber: '1234567890' };
@@ -120,7 +120,7 @@ describe('AdminController', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ error: 'user.errors.phone_taken' });
     });
 
-    test('повинен повернути помилку 422 при помилці валідації', async () => {
+    test('should return error 422 on validation error', async () => {
       const error = {
         name: 'ValidationError',
         errors: {
@@ -137,7 +137,7 @@ describe('AdminController', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ error: 'user.errors.validation' });
     });
 
-    test('повинен повернути помилку 422 при іншій помилці реєстрації', async () => {
+    test('should return error 422 on other registration error', async () => {
       const error = new Error('Database connection error');
       User.create.mockRejectedValue(error);
       mockReq.body = { email: adminEmail, password: 'password123', phoneNumber: '1234567890' };
@@ -165,7 +165,7 @@ describe('AdminController', () => {
       generateToken.mockReset();
     });
 
-    test('повинен успішно авторизувати адміністратора з правильними обліковими даними', async () => {
+    test('must successfully authenticate the administrator with the correct credentials', async () => {
       const mockUser = { _id: 'mockUserId', email: 'admin@example.com', password: 'hashedPassword', role: 'admin', comparePassword: jest.fn().mockResolvedValue(true) };
       User.findOne.mockResolvedValue(mockUser);
       initializeClient.mockResolvedValue('mockSession');
@@ -186,7 +186,7 @@ describe('AdminController', () => {
       });
     });
 
-    test('повинен повернути помилку 403, якщо користувач не є адміністратором', async () => {
+    test('should return a 403 error if the user is not an administrator', async () => {
       const mockUser = { _id: 'mockUserId', email: 'user@example.com', password: 'hashedPassword', role: 'user', comparePassword: jest.fn().mockResolvedValue(true) };
       User.findOne.mockResolvedValue(mockUser);
       mockReq.body = { email: 'user@example.com', password: 'password123' };
@@ -199,7 +199,7 @@ describe('AdminController', () => {
       expect(generateToken).not.toHaveBeenCalled();
     });
 
-    test('повинен повернути помилку 401, якщо користувача не знайдено або пароль неправильний', async () => {
+    test('should return a 401 error if the user is not found or the password is incorrect', async () => {
       User.findOne.mockResolvedValue(null);
       mockReq.body = { email: 'admin@example.com', password: 'wrongPassword' };
 
@@ -214,7 +214,7 @@ describe('AdminController', () => {
       expect(mockRes.json).toHaveBeenCalledWith({ error: 'user.errors.password_email' });
     });
 
-    test('повинен повернути помилку 422 при помилці під час входу', async () => {
+    test('should return error 422 on login failure', async () => {
       const error = new Error('Failed to connect to Telegram');
       User.findOne.mockResolvedValue({ _id: 'mockUserId', role: 'admin', comparePassword: jest.fn().mockResolvedValue(true) });
       initializeClient.mockRejectedValue(error);
@@ -228,7 +228,7 @@ describe('AdminController', () => {
   });
 
   describe('logout', () => {
-    test('повинен успішно вийти з системи та повернути статус 200', async () => {
+    test('should successfully log out and return a status of 200', async () => {
       await logout(mockReq, mockRes);
 
       expect(mockRes.status).toHaveBeenCalledWith(200);
