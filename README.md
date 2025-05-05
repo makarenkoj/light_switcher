@@ -33,3 +33,28 @@ Start tests:
 Tests coverage:
 
  * `npx jest --coverage`
+
+
+Deploy rebuild command:
+----------------------
+
+ * `docker-compose down --volumes --remove-orphans`
+
+ * `docker system prune -af`
+
+ * `docker volume prune -f`
+
+ * `docker-compose -f docker-compose.prod.yml build --no-cache`
+
+ * `docker-compose -f docker-compose.prod.yml up`
+
+ `Rebuild server`
+----------------
+
+* `git pull origin main`
+
+* `docker-compose -f docker-compose.prod.yml down`
+
+* `docker-compose -f docker-compose.prod.yml build`
+
+* `docker-compose -f docker-compose.prod.yml up -d`
