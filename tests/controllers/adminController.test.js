@@ -1,9 +1,8 @@
-import { register, login, logout } from '../../controllers/adminController'; // Шлях до вашого файлу
+import { register, login, logout } from '../../controllers/adminController';
 import User from '../../models/userModel';
 import { initializeClient } from '../../controllers/telegramController';
 import { t } from '../../i18n';
 import { generateToken } from '../../utils/tokenUtils';
-// import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
 afterAll(async () => {
