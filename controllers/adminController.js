@@ -44,11 +44,16 @@ async function login(req, res) {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
+    if (!user) {
+      console.error(t('user.errors.password_email'));
+      return res.status(401).json({ error: t('user.errors.password_email') });
+    }
+
     if (user.role !== 'admin') {
       return res.status(403).json({ error: t('user.errors.not_admin') });
     };
 
-    if (!user || !(await user.comparePassword(password))) {
+    if (!(await user.comparePassword(password))) {
       console.error(t('user.errors.password_email'))
       return res.status(401).json({ error: t('user.errors.password_email') });
     };
@@ -59,7 +64,7 @@ async function login(req, res) {
     res.status(200).json({ message: t('user.success.login'), token, restoredSesion: restoredSesion, userId: user._id });
   } catch (error) {
     console.error(t('user.errors.login_failed', {error: error}));
-    res.status(422).json({ error: t('user.errors.login_failed', {error: error}) });
+    res.status(422).json({ error: t('user.errors.login_failed', {error: error.message}) });
   }
 };
 
