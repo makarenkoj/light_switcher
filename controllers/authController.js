@@ -72,7 +72,7 @@ async function login(req, res) {
 
 async function logout(req, res) {
   try {
-    await io.emit('userNotification', { message: t('user.success.logout') });
+    io.emit('userNotification', { message: t('user.success.logout') });
     res.status(200).json({ message: t('user.success.logout') });
   } catch (error) {
     console.error(t('user.errors.logout', {error: error}));
