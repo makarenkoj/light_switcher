@@ -3,11 +3,6 @@ import User from '../../models/userModel';
 import { initializeClient } from '../../controllers/telegramController';
 import { t } from '../../i18n';
 import { generateToken } from '../../utils/tokenUtils';
-import mongoose from 'mongoose';
-
-afterAll(async () => {
-  await mongoose.connection.close();
-});
 
 jest.mock('../../models/userModel', () => ({
   __esModule: true,

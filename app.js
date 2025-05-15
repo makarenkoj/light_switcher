@@ -24,8 +24,31 @@ export const io = new Server(server, {
   },
 });
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+let currentFilename;
+let currentDirname;
+
+if (typeof __filename !== 'undefined' && typeof __dirname !== 'undefined') {
+  currentFilename = __filename;
+  currentDirname = __dirname;
+} else if (typeof import.meta.url !== 'undefined') {
+  try {
+    currentFilename = fileURLToPath(import.meta.url);
+    currentDirname = path.dirname(currentFilename);
+  } catch (e) {
+    console.warn('Failed to determine paths via import.meta.url:', e);
+    currentFilename = process.cwd() + '/unknown-file.js';
+    currentDirname = process.cwd();
+  }
+} else {
+  console.warn('Could not determine file paths via Jest or import.meta.url. Using module.filename fallback.');
+  if (typeof module !== 'undefined' && typeof module.filename !== 'undefined') {
+    currentFilename = module.filename;
+    currentDirname = path.dirname(currentFilename);
+  } else {
+      currentFilename = process.cwd() + '/ultimate-fallback.js';
+      currentDirname = process.cwd();
+  }
+}
 
 // Cors
 app.use(cors({
@@ -35,7 +58,7 @@ app.use(cors({
 
 // Middleware
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(currentDirname, 'public')));
 // app.use(i18nMiddleware);
 
 // Підключення до MongoDB
@@ -82,19 +105,24 @@ io.on('connection', (socket) => {
 // Запуск сервера
 server.listen(PORT, async () => {
   console.log(t('server_started', { port: PORT }));
+  if (process.env.NODE_ENV !== 'test' || typeof process.env.JEST_WORKER_ID === 'undefined') {
+    const serverInitTimer = setTimeout(async () => {
+      io.emit('serverStarted', { message: t('server_io_message') });
+      const admin = await User.findOne({ role: 'admin' });
+      if (admin) {
+          await initializeClient(admin._id);
+      } else {
+          console.error(t('user.errors.admin_not_found'));
+      }
+      if (serverInitTimer && typeof serverInitTimer.unref === 'function') {
+          serverInitTimer.unref();
+      }
+    }, 3000);
+  } else {
+      console.log(`Server listen callback logic skipped in test environment. Port: ${PORT}`);
+  }
 
-  const admin = await User.findOne({ role: 'admin' });
-
-  setTimeout(async () => {
-    io.emit('serverStarted', { message: t('server_io_message') });
-
-    if (admin) {
-      await initializeClient(admin._id);
-    } else {
-      console.error(t('user.errors.admin_not_found'));
-    };
-
-  }, 3000);
 });
 
 export default app;
+export { server };

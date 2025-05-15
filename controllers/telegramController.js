@@ -8,16 +8,16 @@ import { sendAndHandleMessages } from '../utils/telegramUtils.js';
 import User from '../models/userModel.js';
 import Telegram from '../models/telegramModel.js';
 import { t } from '../i18n.js';
-// import { message } from 'telegram-mtproto/lib/mtproto.js';
 
-// const apiId = parseInt(process.env.API_ID);
-// const apiHash = process.env.API_HASH;
-// const INFO_CHANEL_NAME = process.env.INFO_CHANEL_NAME;
 let client;
 
 async function show(req, res) {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
+
     const telegram = await Telegram.findOne({ userId: user._id });
     if (!telegram) {
       return res.status(404).json({ error: t('telegram.errors.not_found') });
