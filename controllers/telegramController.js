@@ -40,6 +40,10 @@ async function show(req, res) {
 async function create(req, res) {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
+
     const existingTelegram = await Telegram.findOne({ userId: user._id });
     if (existingTelegram) {
       return res.status(409).json({ error: t('telegram.exists') });
