@@ -380,130 +380,131 @@ describe('Telegram Controller', () => {
     });
   });
 
-  // describe('update', () => {
-  //   const updateTelegramData = {
-  //       channel: 'updatedChannel',
-  //       apiId: 98765,
-  //   };
-  //   const updatedTelegram = {
-  //       _id: mockTelegramId,
-  //       userId: mockUserId,
-  //       apiId: 'updatedEncryptedApiId',
-  //       apiHash: 'encryptedApiHash',
-  //       channel: 'updatedChannel',
-  //       getDecryptedApiId: jest.fn().mockReturnValue(updateTelegramData.apiId),
-  //       getDecryptedApiHash: jest.fn().mockReturnValue(mockApiHash),
-  //       deleteOne: jest.fn(),
-  //   };
+  describe('update', () => {
+    const updateTelegramData = {
+        channel: 'updatedChannel',
+        apiId: 98765,
+    };
+    const updatedTelegram = {
+        _id: mockTelegramId,
+        userId: mockUserId,
+        apiId: 'updatedEncryptedApiId',
+        apiHash: 'encryptedApiHash',
+        channel: 'updatedChannel',
+        getDecryptedApiId: jest.fn().mockReturnValue(updateTelegramData.apiId),
+        getDecryptedApiHash: jest.fn().mockReturnValue(mockApiHash),
+        deleteOne: jest.fn(),
+    };
 
-  //   test('should successfully update Telegram configuration', async () => {
-  //     mockReq.body = updateTelegramData;
-  //     Telegram.findOne.mockResolvedValue(mockTelegram);
-  //     Telegram.findByIdAndUpdate.mockResolvedValue(updatedTelegram);
+    test('should successfully update Telegram configuration', async () => {
+      mockReq.body = updateTelegramData;
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      Telegram.findByIdAndUpdate.mockResolvedValue(updatedTelegram);
 
-  //     await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
-  //         mockTelegram.id,
-  //         { $set: updateTelegramData },
-  //         { new: true }
-  //     );
-  //     expect(mockRes.status).toHaveBeenCalledWith(200);
-  //     expect(mockRes.json).toHaveBeenCalledWith({
-  //       message: t('telegram.success.update'),
-  //       telegram: updatedTelegram,
-  //     });
-  //     expect(t).toHaveBeenCalledWith('telegram.success.update');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockTelegram._id,
+          updateTelegramData,
+          { new: true }
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({
+        message: t('telegram.success.update'),
+        telegram: updatedTelegram,
+      });
+      expect(t).toHaveBeenCalledWith('telegram.success.update');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //    test('should return 404 if user not found', async () => {
-  //      mockReq.body = updateTelegramData;
-  //      User.findById.mockResolvedValue(null);
+    test('should return 404 if user not found', async () => {
+      mockReq.body = updateTelegramData;
+      User.findById.mockResolvedValue(null);
 
-  //      await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //      expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //      expect(mockRes.status).toHaveBeenCalledWith(404);
-  //      expect(mockRes.json).toHaveBeenCalledWith({ error: t('user.errors.user_not_found') });
-  //      expect(Telegram.findOne).not.toHaveBeenCalled();
-  //      expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
-  //      expect(t).toHaveBeenCalledWith('user.errors.user_not_found');
-  //      expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //    });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('user.errors.user_not_found') });
+      expect(Telegram.findOne).not.toHaveBeenCalled();
+      expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('user.errors.user_not_found');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('should return 404 if Telegram configuration for the user is not found', async () => {
-  //     mockReq.body = updateTelegramData;
-  //     Telegram.findOne.mockResolvedValue(null);
+    test('should return 404 if Telegram configuration for the user is not found', async () => {
+      mockReq.body = updateTelegramData;
+      Telegram.findOne.mockResolvedValue(null);
 
-  //     await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(mockRes.status).toHaveBeenCalledWith(404);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.not_found') });
-  //     expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.not_found');
-  //     expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.not_found'));
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.not_found') });
+      expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('telegram.errors.not_found');
+      expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.not_found'));
+    });
 
-  //   test('should return 422 if there are no fields to update in the request body', async () => {
-  //     mockReq.body = {};
+    test('should return 422 if there are no fields to update in the request body', async () => {
+      mockReq.body = {};
+      Telegram.findOne.mockResolvedValue(mockTelegram);
 
-  //     await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(mockRes.status).toHaveBeenCalledWith(422);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.nothing_to_update') });
-  //     expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.nothing_to_update');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(mockRes.status).toHaveBeenCalledWith(422);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.nothing_to_update') });
+      expect(Telegram.findByIdAndUpdate).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('telegram.errors.nothing_to_update');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('should return 404 if findByIdAndUpdate returns null (unexpected scenario)', async () => {
-  //     mockReq.body = updateTelegramData;
-  //     Telegram.findOne.mockResolvedValue(mockTelegram);
-  //     Telegram.findByIdAndUpdate.mockResolvedValue(null);
+    test('should return 404 if findByIdAndUpdate returns null (unexpected scenario)', async () => {
+      mockReq.body = updateTelegramData;
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      Telegram.findByIdAndUpdate.mockResolvedValue(null);
 
-  //     await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
-  //         mockTelegram.id,
-  //         { $set: updateTelegramData },
-  //         { new: true }
-  //     );
-  //     expect(mockRes.status).toHaveBeenCalledWith(404);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.updated') });
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.updated');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockTelegram._id,
+          updateTelegramData,
+          { new: true }
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.updated') });
+      expect(t).toHaveBeenCalledWith('telegram.errors.updated');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('should return 422 on a general update error', async () => {
-  //     mockReq.body = updateTelegramData;
-  //     Telegram.findOne.mockResolvedValue(mockTelegram);
-  //     const updateError = new Error('Update DB error');
-  //     Telegram.findByIdAndUpdate.mockRejectedValue(updateError);
+    test('should return 422 on a general update error', async () => {
+      mockReq.body = updateTelegramData;
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      const updateError = new Error('Update DB error');
+      Telegram.findByIdAndUpdate.mockRejectedValue(updateError);
 
-  //     await telegramController.update(mockReq, mockRes);
+      await telegramController.update(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
-  //         mockTelegram.id,
-  //         { $set: updateTelegramData },
-  //         { new: true }
-  //     );
-  //     expect(mockRes.status).toHaveBeenCalledWith(422);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.failed_update', {error: updateError}) });
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.failed_update', {error: updateError});
-  //     expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.failed_update', {error: updateError}), updateError);
-  //   });
-  // });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(Telegram.findByIdAndUpdate).toHaveBeenCalledWith(
+          mockTelegram._id,
+          updateTelegramData,
+          { new: true }
+      );
+      expect(mockRes.status).toHaveBeenCalledWith(422);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.failed_update', {error: updateError}) });
+      expect(t).toHaveBeenCalledWith('telegram.errors.failed_update', {error: updateError});
+      expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.failed_update', {error: updateError}));
+    });
+  });
 
   // describe('remove', () => {
   //   test('should successfully delete Telegram configuration', async () => {

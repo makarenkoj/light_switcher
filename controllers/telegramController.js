@@ -69,6 +69,10 @@ async function create(req, res) {
 async function update(req, res) {
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
+
     const telegram = await Telegram.findOne({ userId: user._id });
     if (!telegram) {
       console.error(t('telegram.errors.not_found'));
@@ -82,10 +86,11 @@ async function update(req, res) {
     if (apiHash) updateFields.apiHash = apiHash;
 
     if (Object.keys(updateFields).length === 0) {
+      console.log('updateFields:', updateFields);
       return res.status(422).json({ error: t('telegram.errors.nothing_to_update') });
     };
 
-    const updateData = await Telegram.findByIdAndUpdate(telegram.id, updateFields, { new: true });
+    const updateData = await Telegram.findByIdAndUpdate(telegram._id, updateFields, { new: true });
     if (!updateData) {
       return res.status(404).json({ error: t('telegram.errors.updated') });
     }
