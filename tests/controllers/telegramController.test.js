@@ -48,6 +48,7 @@ jest.mock('../../i18n.js', () => ({
 import * as telegramController from '../../controllers/telegramController.js';
 
 let consoleErrorSpy;
+let consoleLogSpy;
 let mockUserId;
 let mockTelegramId;
 let mockSessionId;
@@ -69,6 +70,7 @@ let mockClientInstance;
 
 beforeAll(() => {
   consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
 
   mockUserId = 'user123';
   mockTelegramId = 'telegram456';
@@ -112,12 +114,10 @@ beforeAll(() => {
   };
 
   TelegramClient.mockImplementation(() => mockClientInstance);
-  StringSession.mockImplementation((session) => ({
-      session: session,
-      save: jest.fn().mockReturnValue(session),
+  StringSession.mockImplementation(jest.fn(function(session) {
+    this.session = session;
+    this.save = jest.fn().mockReturnValue(session);
   }));
-
-  consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 });
 
 afterAll(() => {
@@ -587,119 +587,114 @@ describe('Telegram Controller', () => {
     });
   });
 
-  // describe('initializeClient', () => {
-  //   test('повинен ініціалізувати клієнт та повернути true, якщо користувач авторизований (і сесія існує)', async () => {
-  //     // User.findById налаштований на успіх в beforeEach
-  //     Session.findOne.mockResolvedValue(mockSessionData); // Сесія існує
-  //     Telegram.findOne.mockResolvedValue(mockTelegram); // Telegram конфіг існує
-  //     mockClientInstance.isUserAuthorized.mockResolvedValue(true); // Користувач авторизований
+  describe('initializeClient', () => {
+    test('should initialize the client and return true if the user is authorized (and the session exists)', async () => {
+      Session.findOne.mockResolvedValue(mockSessionData);
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      mockClientInstance.isUserAuthorized.mockResolvedValue(true);
 
-  //     const result = await telegramController.initializeClient(mockUserId);
+      const result = await telegramController.initializeClient(mockUserId);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(StringSession).toHaveBeenCalledWith(mockSessionData.session); // StringSession створено з даними сесії
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
-  //     expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
-  //     // Перевіряємо виклик конструктора TelegramClient
-  //     expect(TelegramClient).toHaveBeenCalledWith(
-  //         expect.any(StringSession), // Очікуємо інстанс StringSession
-  //         mockApiId, // Дешифрований apiId
-  //         mockApiHash, // Дешифрований apiHash
-  //         { connectionRetries: 5 }
-  //     );
-  //     expect(mockClientInstance.connect).toHaveBeenCalledTimes(1); // connect викликався
-  //     expect(console.log).toHaveBeenCalledWith(t('telegram.success.initialized')); // Лог ініціалізації
-  //     expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); // isUserAuthorized викликався
-  //     expect(console.log).toHaveBeenCalledWith(t('telegram.success.session')); // Лог успішної сесії
-  //     expect(sendAndHandleMessages).toHaveBeenCalledWith(
-  //         mockClientInstance,
-  //         mockTelegram.channel,
-  //         t('telegram.success.session'),
-  //         t('telegram.success.come_back_user'),
-  //         mockUser
-  //     );
-  //      // Перевіряємо, що saveSession була викликана (або перевірити її виклик на Session.findOneAndUpdate)
-  //      // initializeClient не викликає saveSession безпосередньо, saveSession викликається в signIn
-  //      // expect(saveSession).not.toHaveBeenCalled(); // saveSession тут не викликається
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //     expect(result).toBe(true); // Повинно повернути true
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(StringSession).toHaveBeenCalledWith(mockSessionData.session);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
+      expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
+      expect(TelegramClient).toHaveBeenCalledWith(
+        expect.any(StringSession),
+        mockApiId,
+        mockApiHash,
+        { connectionRetries: 5 }
+      );
 
-  //   test('повинен ініціалізувати клієнт та повернути true, якщо користувач авторизований (і сесія НЕ існує)', async () => {
-  //     Session.findOne.mockResolvedValue(null); // Сесія НЕ існує
-  //     Telegram.findOne.mockResolvedValue(mockTelegram);
-  //     mockClientInstance.isUserAuthorized.mockResolvedValue(true);
+      expect(mockClientInstance.connect).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(t('telegram.success.initialized'));
+      expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(t('telegram.success.session'));
+      expect(sendAndHandleMessages).toHaveBeenCalledWith(
+        mockClientInstance,
+        mockTelegram.channel,
+        t('telegram.success.session'),
+        t('telegram.success.come_back_user'),
+        mockUser
+      );
 
-  //     const result = await telegramController.initializeClient(mockUserId);
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(StringSession).toHaveBeenCalledWith(''); // StringSession створено з порожнім рядком
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
-  //     expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
-  //     expect(TelegramClient).toHaveBeenCalledWith(expect.any(StringSession), mockApiId, mockApiHash, { connectionRetries: 5 });
-  //     expect(mockClientInstance.connect).toHaveBeenCalledTimes(1);
-  //     expect(console.log).toHaveBeenCalledWith(t('telegram.success.initialized'));
-  //     expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
-  //     expect(console.log).toHaveBeenCalledWith(t('telegram.success.session'));
-  //     expect(sendAndHandleMessages).toHaveBeenCalledWith(
-  //         mockClientInstance,
-  //         mockTelegram.channel,
-  //         t('telegram.success.session'),
-  //         t('telegram.success.come_back_user'),
-  //         mockUser
-  //     );
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //     expect(result).toBe(true); // Повинно повернути true
-  //   });
+    test('should initialize the client and return true if the user is authorized (and the session does NOT exist)', async () => {
+      Session.findOne.mockResolvedValue(null);
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      mockClientInstance.isUserAuthorized.mockResolvedValue(true);
 
-  //   test('повинен ініціалізувати клієнт та повернути false, якщо користувач НЕ авторизований', async () => {
-  //     Session.findOne.mockResolvedValue(mockSessionData); // Сесія існує
-  //     Telegram.findOne.mockResolvedValue(mockTelegram);
-  //     mockClientInstance.isUserAuthorized.mockResolvedValue(false); // Користувач НЕ авторизований
+      const result = await telegramController.initializeClient(mockUserId);
 
-  //     const result = await telegramController.initializeClient(mockUserId);
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(StringSession).toHaveBeenCalledWith('');
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
+      expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
+      expect(TelegramClient).toHaveBeenCalledWith(expect.any(StringSession), mockApiId, mockApiHash, { connectionRetries: 5 });
+      expect(mockClientInstance.connect).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(t('telegram.success.initialized'));
+      expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(t('telegram.success.session'));
+      expect(sendAndHandleMessages).toHaveBeenCalledWith(
+        mockClientInstance,
+        mockTelegram.channel,
+        t('telegram.success.session'),
+        t('telegram.success.come_back_user'),
+        mockUser
+      );
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(StringSession).toHaveBeenCalledWith(mockSessionData.session);
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
-  //     expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
-  //     expect(TelegramClient).toHaveBeenCalledWith(expect.any(StringSession), mockApiId, mockApiHash, { connectionRetries: 5 });
-  //     expect(mockClientInstance.connect).toHaveBeenCalledTimes(1);
-  //     expect(console.log).toHaveBeenCalledWith(t('telegram.success.initialized'));
-  //     expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
-  //     expect(sendAndHandleMessages).not.toHaveBeenCalled(); // Повідомлення не надсилається
-  //     expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.sesion')); // Лог помилки авторизації
-  //     expect(result).toBe(false); // Повинно повернути false
-  //   });
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
 
-  //   test('повинен повернути повідомлення про помилку, якщо Telegram конфігурацію не знайдено', async () => {
-  //     Session.findOne.mockResolvedValue(mockSessionData); // Сесія існує
-  //     Telegram.findOne.mockResolvedValue(null); // Telegram конфіг НЕ знайдено
+    test('should initialize the client and return false if the user is NOT authorized', async () => {
+      Session.findOne.mockResolvedValue(mockSessionData);
+      Telegram.findOne.mockResolvedValue(mockTelegram);
+      mockClientInstance.isUserAuthorized.mockResolvedValue(false);
 
-  //     const result = await telegramController.initializeClient(mockUserId);
+      const result = await telegramController.initializeClient(mockUserId);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId }); // Сесія все одно шукається
-  //     expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
-  //     expect(StringSession).not.toHaveBeenCalled(); // Клієнт не ініціалізується
-  //     expect(TelegramClient).not.toHaveBeenCalled();
-  //     expect(mockClientInstance.connect).not.toHaveBeenCalled();
-  //     expect(mockClientInstance.isUserAuthorized).not.toHaveBeenCalled();
-  //     expect(sendAndHandleMessages).not.toHaveBeenCalled();
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled(); // Логу помилки немає в цій гілці
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(StringSession).toHaveBeenCalledWith(mockSessionData.session);
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(mockTelegram.getDecryptedApiId).toHaveBeenCalled();
+      expect(mockTelegram.getDecryptedApiHash).toHaveBeenCalled();
+      expect(TelegramClient).toHaveBeenCalledWith(expect.any(StringSession), mockApiId, mockApiHash, { connectionRetries: 5 });
+      expect(mockClientInstance.connect).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy).toHaveBeenCalledWith(t('telegram.success.initialized'));
+      expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
+      expect(sendAndHandleMessages).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.sesion'));
+      expect(result).toBe(false);
+    });
 
-  //     expect(result).toBe(t('telegram.errors.not_found')); // Повинно повернути повідомлення про помилку
-  //   });
+    test('should return an error message if Telegram configuration is not found', async () => {
+      Session.findOne.mockResolvedValue(mockSessionData);
+      Telegram.findOne.mockResolvedValue(null);
 
-  //    // NOTE: initializeClient не має свого try...catch. Його помилки обробляються там, де його викликають (наприклад, в getClient).
-  //    // Тому тест на загальну помилку initializeClient робиться опосередковано через getClient або checkSession.
-  // });
+      const result = await telegramController.initializeClient(mockUserId);
+
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Session.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(Telegram.findOne).toHaveBeenCalledWith({ userId: mockUserId });
+      expect(StringSession).toHaveBeenCalledWith(mockSessionData.session);
+      expect(TelegramClient).not.toHaveBeenCalled();
+      expect(mockClientInstance.connect).not.toHaveBeenCalled();
+      expect(mockClientInstance.isUserAuthorized).not.toHaveBeenCalled();
+      expect(sendAndHandleMessages).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+
+      expect(result).toBe(t('telegram.errors.not_found'));
+    });
+  });
 
   // describe('getClient', () => {
   //   let initializeClientSpy;
