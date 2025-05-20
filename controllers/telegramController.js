@@ -320,6 +320,7 @@ async function getClient() {
 
   } catch (error) {
     console.error(t('errors.client', {error: error}));
+    return null;
   }
 }
 

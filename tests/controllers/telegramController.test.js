@@ -14,6 +14,7 @@ jest.mock('dotenv');
 dotenv.config.mockImplementation(() => {});
 
 jest.mock('telegram', () => ({
+  ...jest.requireActual('telegram'),
   Api: {
     auth: {
       SendCode: jest.fn(),
@@ -30,6 +31,7 @@ jest.mock('telegram', () => ({
   },
   TelegramClient: jest.fn(),
 }));
+
 jest.mock('telegram/sessions/index.js', () => ({
   StringSession: jest.fn(),
 }));
@@ -122,6 +124,8 @@ beforeAll(() => {
 
 afterAll(() => {
   consoleErrorSpy.mockRestore();
+  consoleLogSpy.mockRestore();
+  mockClientInstance.connect.mockClear();
 });
 
 describe('Telegram Controller', () => {
@@ -169,6 +173,7 @@ describe('Telegram Controller', () => {
     Api.channels.GetParticipant.mockReset();
 
     consoleErrorSpy.mockClear();
+    consoleLogSpy.mockClear();
 
     mockTelegram.getDecryptedApiId.mockClear().mockReturnValue(mockApiId);
     mockTelegram.getDecryptedApiHash.mockClear().mockReturnValue(mockApiHash);
@@ -696,116 +701,66 @@ describe('Telegram Controller', () => {
     });
   });
 
-  // describe('getClient', () => {
-  //   let initializeClientSpy;
+  describe('getClient', () => {
+    let initializeClientSpy;
+    let originalClient;
 
-  //   beforeEach(() => {
-  //       initializeClientSpy = jest.spyOn(telegramController, 'initializeClient');
-  //   });
+    beforeEach(async () => {
+      User.findById.mockResolvedValue(mockAdminUser);
+      User.findOne.mockResolvedValue(mockAdminUser); 
 
-  //   afterEach(() => {
-  //       initializeClientSpy.mockRestore(); // Відновлюємо initializeClient після кожного тесту
-  //   });
+      originalClient = telegramController.client;
 
-  //   test('повинен повернути існуючий авторизований клієнт', async () => {
-  //     mockClientInstance.isUserAuthorized.mockResolvedValue(true);
-  //       initializeClientSpy.mockResolvedValue(true); // Його не мають викликати
+      mockClientInstance.isUserAuthorized.mockReset();
+      mockClientInstance.connect.mockReset();
+      mockClientInstance.session.save.mockReset();
+      mockClientInstance.invoke.mockReset();
+      mockClientInstance.getMe.mockReset();
 
-  //       await telegramController.initializeClient(mockUserId); // Ініціалізуємо клієнта
+      mockClientInstance.isUserAuthorized.mockResolvedValue(false);
+      mockClientInstance.connect.mockResolvedValue(true);
+      mockClientInstance.session.save.mockReturnValue('mockSessionString');
+      mockClientInstance.invoke.mockResolvedValue({});
+      mockClientInstance.getMe.mockResolvedValue({ username: 'mockUsername' });
 
-  //     const result = await telegramController.getClient();
+      initializeClientSpy = jest.spyOn(telegramController, 'initializeClient');
+      initializeClientSpy.mockClear(); 
+      initializeClientSpy.mockResolvedValue(true);
+      
+      telegramController.client = undefined; 
+    });
 
-  //       expect(initializeClientSpy).toHaveBeenCalledTimes(1); // викликався до тесту
-  //       expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); // викликався в getClient
-  //       expect(initializeClientSpy).toHaveBeenCalledTimes(1); // Викликався тільки перед тестом
+    afterEach(() => {
+      initializeClientSpy.mockRestore();
+      telegramController.client = originalClient; 
+    });
 
-  //       expect(result).toBe(mockClientInstance); // Повинен повернути встановлений клієнт
-  //       expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //     });
+    test('must return an existing authorized client', async () => {
+      telegramController.client = mockClientInstance;
+      mockClientInstance.isUserAuthorized.mockResolvedValue(true);
 
-  //      test('повинен ініціалізувати клієнт та повернути його, якщо він ще не авторизований, але ініціалізація успішна', async () => {
-  //          // Встановлюємо module-scoped client як undefined на початку тесту ( Jest ізолює їх)
-  //          // Мокуємо initializeClient, щоб він повернув true (успіх ініціалізації)
-  //          initializeClientSpy.mockResolvedValue(true);
-  //           // Мокуємо isUserAuthorized на мок-інстансі client, щоб він спочатку був false
-  //          mockClientInstance.isUserAuthorized.mockResolvedValue(false); // client не авторизований
+      const result = await telegramController.getClient();
 
-  //           // getClient спробує викликати isUserAuthorized (буде false), потім initializeClient
-  //           // initializeClientspy поверне true, і controller.client буде встановлено.
-  //          // initializeClientSpy сам потурбується про встановлення client, якщо його мок правильно імітує це.
-  //          // Або ми можемо змусити initializeClientSpy встановити client.
-  //          // Простіше мокувати initializeClientSpy так, щоб він імітував встановлення client
-  //          initializeClientSpy.mockImplementation(async (userId) => {
-  //              // Імітуємо ініціалізацію: встановлюємо module-scoped client
-  //              // Це потребує доступу до module-scoped змінної client в telegramController, що складно моками Jest.
-  //              // АБО просто мокуємо initializeClientSpy повертати true І переконуємося, що controller повертає client.
-  //              // Для цього, можливо, потрібно змусити controller.client посилатись на mockClientInstance.
+      expect(telegramController.initializeClient).not.toHaveBeenCalled();
+      expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); 
+      expect(result).toBe(mockClientInstance);
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //              // Альтернативний підхід: мокувати getClient напряму, щоб імітувати різні стани
-  //              // Це часто простіше, ніж імітувати module-scoped змінні
-  //              // давайте перепишемо тести getClient мокуючи його напряму
+    test('should log an error and return null on error during authorization or initialization check', async () => {
+      const authError = new Error('Auth check failed');
+      telegramController.client = mockClientInstance;
+      mockClientInstance.isUserAuthorized.mockRejectedValue(authError);
 
-  //              // === Перепишемо тест, мокуючи getClient напряму ===
-  //               // Мокуємо getClient замість initializeClientSpy для цього тесту
-  //               const getClientSpy = jest.spyOn(telegramController, 'getClient');
-  //               getClientSpy.mockRestore(); // Відновлюємо getClient Spy, щоб мокувати його
+      const result = await telegramController.getClient();
 
-  //               // Мокуємо initializeClient, щоб він повернув true (успіх ініціалізації)
-  //               initializeClientSpy.mockResolvedValue(true);
-  //               // Мокуємо isUserAuthorized, щоб спочатку був false
-  //               mockClientInstance.isUserAuthorized.mockResolvedValue(false);
-
-  //               // Викликаємо initializeClient, щоб він спробував встановити client
-  //               // Це може не спрацювати через ізоляцію моків.
-  //               // Простіше мокувати getClient так, щоб він імітував поведінку контролера.
-  //               // Давайте повернемось до мокування initializeClientSpy і припустимо, що він встановлює client.
-
-  //               initializeClientSpy.mockResolvedValue(true); // InitializeClient успішний
-  //               mockClientInstance.isUserAuthorized.mockResolvedValue(false); // client не авторизований спочатку
-
-  //               const result = await telegramController.getClient();
-
-  //               expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); // isUserAuthorized викликався
-  //               expect(initializeClientSpy).toHaveBeenCalledTimes(1); // initializeClient викликався
-  //               expect(result).toBe(mockClientInstance); // Повинен повернути встановлений клієнт
-  //               expect(consoleErrorSpy).not.toHaveBeenCalled();
-
-  //              // === Кінець переписаного тесту ===
-  //              getClientSpy.mockRestore(); // Відновлюємо getClient Spy
-  //      });
-
-  //      test('повинен повернути null, якщо клієнт не авторизований і ініціалізація неуспішна', async () => {
-  //           // Мокуємо initializeClient, щоб він повернув false (невдача ініціалізації)
-  //          initializeClientSpy.mockResolvedValue(false);
-  //           // Мокуємо isUserAuthorized на мок-інстансі client, щоб він спочатку був false
-  //          mockClientInstance.isUserAuthorized.mockResolvedValue(false);
-
-  //          const result = await telegramController.getClient();
-
-  //          expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); // isUserAuthorized викликався
-  //          expect(initializeClientSpy).toHaveBeenCalledTimes(1); // initializeClient викликався
-  //          expect(result).toBeNull(); // Повинен повернути null
-  //          expect(consoleErrorSpy).not.toHaveBeenCalled(); // Лог відбувається в initializeClient, а не тут
-
-  //      });
-
-  //      test('повинен логувати помилку та повернути null при помилці під час перевірки авторизації або ініціалізації', async () => {
-  //           // Мокуємо isUserAuthorized на мок-інстансі client, щоб він відхилив обіцянку (помилка)
-  //          const authError = new Error('Auth check failed');
-  //          mockClientInstance.isUserAuthorized.mockRejectedValue(authError);
-
-  //          const result = await telegramController.getClient();
-
-  //          expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1); // isUserAuthorized викликався і впав
-  //          expect(initializeClientSpy).not.toHaveBeenCalled(); // initializeClient не має викликатись
-
-  //          expect(result).toBeNull(); // Повинен повернути null
-  //          // Перевіряємо логування помилки
-  //          expect(t).toHaveBeenCalledWith('errors.client', {error: authError});
-  //          expect(consoleErrorSpy).toHaveBeenCalledWith(t('errors.client', {error: authError})); // Лог помилки
-
-  //      });
-  //  });
+      expect(mockClientInstance.isUserAuthorized).toHaveBeenCalledTimes(1);
+      expect(telegramController.initializeClient).not.toHaveBeenCalled(); 
+      expect(result).toBeNull();
+      expect(t).toHaveBeenCalledWith('errors.client', {error: authError});
+      expect(consoleErrorSpy).toHaveBeenCalledWith(t('errors.client', {error: authError}));
+    });
+  });
 
   // describe('sendCode', () => {
   //   // sendCode використовує req/res та initializeClient/client
