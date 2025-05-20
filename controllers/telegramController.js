@@ -105,6 +105,10 @@ async function update(req, res) {
 async function remove(req, res) {
   try {
     const user = await User.findById(req.user._id);
+        if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
+
     const telegram = await Telegram.findById(req.params.id); 
 
     if (!telegram) {
@@ -120,10 +124,9 @@ async function remove(req, res) {
   } catch (error) {
     console.error(t('telegram.errors.delete', {error: error}));
     res.status(422).json({ error: t('telegram.errors.delete', {error: error}) });
-  };s
+  };
 };
 
-//////////////////////////////////////
 async function saveSession(userId) {
   const sessionString = client.session.save();
   await Session.findOneAndUpdate(

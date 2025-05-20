@@ -506,92 +506,86 @@ describe('Telegram Controller', () => {
     });
   });
 
-  // describe('remove', () => {
-  //   test('should successfully delete Telegram configuration', async () => {
-  //     mockReq.params.id = mockTelegramId;
-  //     Telegram.findById.mockResolvedValue(mockTelegram);
+  describe('remove', () => {
+    test('should successfully delete Telegram configuration', async () => {
+      mockReq.params.id = mockTelegramId;
+      Telegram.findById.mockResolvedValue(mockTelegram);
 
-  //     await telegramController.remove(mockReq, mockRes);
+      await telegramController.remove(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
-  //     expect(mockTelegram.deleteOne).toHaveBeenCalledTimes(1);
-  //     expect(mockRes.status).toHaveBeenCalledWith(200);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ message: t('telegram.success.delete') });
-  //     expect(t).toHaveBeenCalledWith('telegram.success.delete');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
+      expect(mockTelegram.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockRes.status).toHaveBeenCalledWith(200);
+      expect(mockRes.json).toHaveBeenCalledWith({ message: t('telegram.success.delete') });
+      expect(t).toHaveBeenCalledWith('telegram.success.delete');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('should return 404 if user not found', async () => {
-  //     mockReq.params.id = mockTelegramId;
-  //     User.findById.mockResolvedValue(null);
+    test('should return 404 if user not found', async () => {
+      mockReq.params.id = mockTelegramId;
+      User.findById.mockResolvedValue(null);
 
-  //     await telegramController.remove(mockReq, mockRes);
+      await telegramController.remove(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(mockRes.status).toHaveBeenCalledWith(404);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('user.errors.user_not_found') });
-  //     expect(Telegram.findById).not.toHaveBeenCalled();
-  //     expect(mockTelegram.deleteOne).not.toHaveBeenCalled();
-  //     expect(t).toHaveBeenCalledWith('user.errors.user_not_found');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('user.errors.user_not_found') });
+      expect(Telegram.findById).not.toHaveBeenCalled();
+      expect(mockTelegram.deleteOne).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('user.errors.user_not_found');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('should return 404 if Telegram configuration not found by ID', async () => {
-  //     mockReq.params.id = mockTelegramId;
-  //     // User.findById налаштований на успіх
-  //     Telegram.findById.mockResolvedValue(null); // Конфігурацію не знайдено
+    test('should return 404 if Telegram configuration not found by ID', async () => {
+      mockReq.params.id = mockTelegramId;
+      Telegram.findById.mockResolvedValue(null);
 
-  //     await telegramController.remove(mockReq, mockRes);
+      await telegramController.remove(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
-  //     expect(mockRes.status).toHaveBeenCalledWith(404);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.not_found') });
-  //     expect(mockTelegram.deleteOne).not.toHaveBeenCalled();
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.not_found');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
+      expect(mockRes.status).toHaveBeenCalledWith(404);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.not_found') });
+      expect(mockTelegram.deleteOne).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('telegram.errors.not_found');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('повинен повернути 403, якщо користувач не авторизований для видалення конфігурації', async () => {
-  //     mockReq.params.id = mockTelegramId;
-  //     // User.findById налаштований на успіх
-  //     // Мокуємо Telegram.findById, щоб повернув конфігурацію іншого користувача
-  //     const anotherUserTelegram = { ...mockTelegram, userId: 'anotherUserId' };
-  //      // Важливо, щоб deleteOne був моком на цьому іншому об'єкті
-  //      anotherUserTelegram.deleteOne = jest.fn().mockResolvedValue({ acknowledged: true, deletedCount: 1 });
-  //     Telegram.findById.mockResolvedValue(anotherUserTelegram);
+    test('should return 403 if the user is not authorized to delete the configuration', async () => {
+      mockReq.params.id = mockTelegramId;
+      const anotherUserTelegram = { ...mockTelegram, userId: 'anotherUserId' };
+      anotherUserTelegram.deleteOne = jest.fn().mockResolvedValue({ acknowledged: true, deletedCount: 1 });
+      Telegram.findById.mockResolvedValue(anotherUserTelegram);
 
-  //     await telegramController.remove(mockReq, mockRes);
+      await telegramController.remove(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
-  //     expect(mockRes.status).toHaveBeenCalledWith(403);
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.authorize_delete') });
-  //     expect(anotherUserTelegram.deleteOne).not.toHaveBeenCalled(); // deleteOne не має викликатись
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.authorize_delete');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
-  //   });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
+      expect(mockRes.status).toHaveBeenCalledWith(403);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.authorize_delete') });
+      expect(anotherUserTelegram.deleteOne).not.toHaveBeenCalled();
+      expect(t).toHaveBeenCalledWith('telegram.errors.authorize_delete');
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
 
-  //   test('повинен повернути 422 при загальній помилці видалення', async () => {
-  //     mockReq.params.id = mockTelegramId;
-  //     // User.findById налаштований на успіх
-  //     Telegram.findById.mockResolvedValue(mockTelegram);
-  //     const deleteError = new Error('Delete DB error');
-  //     mockTelegram.deleteOne.mockRejectedValue(deleteError); // deleteOne падає
+    test('should return 422 on a general delete error', async () => {
+      mockReq.params.id = mockTelegramId;
+      Telegram.findById.mockResolvedValue(mockTelegram);
+      const deleteError = new Error('Delete DB error');
+      mockTelegram.deleteOne.mockRejectedValue(deleteError);
 
-  //     await telegramController.remove(mockReq, mockRes);
+      await telegramController.remove(mockReq, mockRes);
 
-  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //     expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
-  //     expect(mockTelegram.deleteOne).toHaveBeenCalledTimes(1);
-  //     expect(mockRes.status).toHaveBeenCalledWith(422);
-  //     // Перевіряємо JSON відповідь та логування
-  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.delete', {error: deleteError}) });
-  //     expect(t).toHaveBeenCalledWith('telegram.errors.delete', {error: deleteError});
-  //     expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.delete', {error: deleteError}), deleteError);
-  //   });
-  // });
+      expect(User.findById).toHaveBeenCalledWith(mockUserId);
+      expect(Telegram.findById).toHaveBeenCalledWith(mockTelegramId);
+      expect(mockTelegram.deleteOne).toHaveBeenCalledTimes(1);
+      expect(mockRes.status).toHaveBeenCalledWith(422);
+      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.delete', {error: deleteError}) });
+      expect(t).toHaveBeenCalledWith('telegram.errors.delete', {error: deleteError});
+      expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.delete', {error: deleteError}));
+    });
+  });
 
   // describe('initializeClient', () => {
   //   test('повинен ініціалізувати клієнт та повернути true, якщо користувач авторизований (і сесія існує)', async () => {
