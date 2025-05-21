@@ -105,7 +105,7 @@ async function update(req, res) {
 async function remove(req, res) {
   try {
     const user = await User.findById(req.user._id);
-        if (!user) {
+    if (!user) {
       return res.status(404).json({ error: t('user.errors.user_not_found') });
     };
 
@@ -171,14 +171,17 @@ async function sendCode(req, res) {
   try {
     console.log('sendCode:', true);
     const user = await User.findById(req.user._id);
-    const sessionData = await Session.findOne({ userId: user._id });
-    const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
-    const telegram = await Telegram.findOne({ userId: user._id });
+    if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
 
+    const telegram = await Telegram.findOne({ userId: user._id });
     if (!telegram) {
       return res.status(404).json({ error: t('telegram.errors.not_found') });
     };
 
+    const sessionData = await Session.findOne({ userId: user._id });
+    const stringSession = sessionData ? new StringSession(sessionData.session) : new StringSession('');
     const apiId = telegram.getDecryptedApiId();
     const apiHash = telegram.getDecryptedApiHash();
     const INFO_CHANEL_NAME = telegram.channel;
@@ -226,7 +229,7 @@ async function sendCode(req, res) {
   }
 };
 
-async function signIn(req, res) {
+async function signIn(req, res) { // To-do: fix this function when sms code send seccessfully
   try {
     const user = await User.findById(req.user._id);
     const phoneNumber = user.phoneNumber;
