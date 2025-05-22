@@ -929,218 +929,164 @@ describe('Telegram Controller', () => {
   });
 
   // describe('signIn', () => {
-  //   // signIn використовує req/res, client, saveSession, sendAndHandleMessages, prepareSRP
-  //   // припускаємо, що `client` вже встановлений перед викликом signIn
-  //   // Для цього тесту мокуємо getClient, щоб він повернув mockClientInstance
   //   let getClientSpy;
   //   let saveSessionSpy;
 
   //   beforeEach(() => {
-  //       // Шпигуємо за getClient та saveSession
-  //       getClientSpy = jest.spyOn(telegramController, 'getClient');
-  //        // getClient Spy мокуємо, щоб завжди повертав mockClientInstance для тестів signIn
-  //       getClientSpy.mockResolvedValue(mockClientInstance); // Забезпечуємо наявність клієнта
+  //     getClientSpy = jest.spyOn(telegramController, 'getClient');
+  //     getClientSpy.mockResolvedValue(mockClientInstance);
 
-  //        saveSessionSpy = jest.spyOn(telegramController, 'saveSession');
-  //         // Мокуємо saveSession, щоб він нічого не робив, а просто перевіряємо, що викликався
-  //        saveSessionSpy.mockResolvedValue(true); // Він async
+  //     saveSessionSpy = jest.spyOn(telegramController, 'saveSession');
+  //     saveSessionSpy.mockResolvedValue(true);
   //   });
 
   //   afterEach(() => {
-  //       getClientSpy.mockRestore(); // Відновлюємо getClient
-  //       saveSessionSpy.mockRestore(); // Відновлюємо saveSession
+  //     getClientSpy.mockRestore();
+  //     saveSessionSpy.mockRestore();
   //   });
 
-
-  //   test('повинен успішно авторизувати користувача за кодом', async () => {
+  //   test('must successfully authorize the user by code', async () => {
   //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
-  //     // User.findById налаштований на успіх (з номером телефону)
-  //     // getClientSpy налаштований на повернення mockClientInstance
-
-  //      // Мокуємо invoke для SignIn API виклику
   //     const mockSignInResult = { className: "auth.Authorization", user: { id: 'telegramUserId123' } };
-  //     Api.auth.SignIn.mockImplementation((args) => args); // Повертаємо аргументи як мок API об'єкта
+  //     Api.auth.SignIn.mockImplementation((args) => args);
   //     mockClientInstance.invoke.mockResolvedValue(mockSignInResult);
-
-  //      // Мокуємо sendAndHandleMessages на успіх
-  //      sendAndHandleMessages.mockResolvedValue(true);
+  //     sendAndHandleMessages.mockResolvedValue(true);
 
   //     await telegramController.signIn(mockReq, mockRes);
 
   //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //      // Перевіряємо, що client був отриманий
   //     expect(getClientSpy).toHaveBeenCalledTimes(1);
-  //      // Перевіряємо виклик Api.auth.SignIn з правильними аргументами
   //     expect(Api.auth.SignIn).toHaveBeenCalledWith({
   //         phoneNumber: mockPhoneNumber,
   //         phoneCodeHash: mockPhoneCodeHash,
   //         phoneCode: mockCode,
   //     });
-  //     // Перевіряємо виклик client.invoke з результатом Api.auth.SignIn
   //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
-
   //     expect(saveSessionSpy).toHaveBeenCalledWith(mockUserId);
   //     expect(sendAndHandleMessages).toHaveBeenCalledWith(expect.any(TelegramClient), expect.any(String), expect.any(String), expect.any(String), mockUser);
-
   //     expect(mockRes.status).toHaveBeenCalledWith(200);
   //     expect(mockRes.json).toHaveBeenCalledWith({ message: t('telegram.success.sign_in'), user: mockSignInResult.user, authorized: true });
   //     expect(t).toHaveBeenCalledWith('telegram.success.sign_in');
-  //     expect(consoleErrorSpy).not.toHaveBeenCalled(); // Лог помилки відсутій при успіху
+  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
   //   });
 
-  //   test('повинен успішно авторизувати користувача через 2FA, якщо SESSION_PASSWORD_NEEDED', async () => {
+  //   test('should successfully authenticate the user via 2FA if SESSION_PASSWORD_NEEDED', async () => {
   //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
   //     const passwordNeededError = new Error('SESSION_PASSWORD_NEEDED');
   //     passwordNeededError.errorMessage = 'SESSION_PASSWORD_NEEDED';
   //     mockClientInstance.invoke.mockRejectedValueOnce(passwordNeededError);
-
   //     const mockPasswordInfo = { srpId: mockSrpId };
   //     Api.account.GetPassword.mockImplementation((args) => args);
   //     mockClientInstance.invoke.mockResolvedValueOnce(mockPasswordInfo);
-
-  //       // Мокуємо prepareSRP
-  //      const mockSrpData = { A: mockSrpA, M1: mockSrpM1 };
-  //      prepareSRP.mockResolvedValue(mockSrpData);
-
-  //       // Мокуємо invoke для CheckPassword
-  //      const mockAuthResult = { className: "auth.Authorization", user: { id: 'telegramUserId123_2fa' } };
-  //      Api.auth.CheckPassword.mockImplementation((args) => args);
-  //      mockClientInstance.invoke.mockResolvedValueOnce(mockAuthResult); // Третій виклик (CheckPassword) успішний
-
-  //       // Мокуємо process.env.PASSWORD для цього тесту
-  //       const originalPassword = process.env.PASSWORD;
-  //       process.env.PASSWORD = mockPassword;
-
-  //      await telegramController.signIn(mockReq, mockRes);
-
-  //      expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //      expect(getClientSpy).toHaveBeenCalledTimes(1);
-  //      // Перевіряємо виклик invoke для SignIn
-  //      expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
-
-  //      // Перевіряємо кроки 2FA потоку
-  //      expect(Api.account.GetPassword).toHaveBeenCalledTimes(1);
-  //      expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.account.GetPassword)); // invoke викликався вдруге
-  //      expect(prepareSRP).toHaveBeenCalledWith(mockPasswordInfo, mockPassword);
-  //      expect(Api.auth.CheckPassword).toHaveBeenCalledWith({
-  //          password: expect.any(Api.InputCheckPasswordSRP) // Перевіряємо створення InputCheckPasswordSRP
-  //      });
-  //      expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.CheckPassword)); // invoke викликався втретє
-
-  //      // Перевіряємо виклик saveSession
-  //      expect(saveSessionSpy).toHaveBeenCalledWith(mockUserId);
-  //      // sendAndHandleMessages НЕ викликається в гілці 2FA
-  //      expect(sendAndHandleMessages).not.toHaveBeenCalled();
-
-  //      expect(mockRes.status).toHaveBeenCalledWith(200);
-  //      expect(mockRes.json).toHaveBeenCalledWith({ message: t('telegram.success.2fa'), user: mockAuthResult.user });
-  //      expect(t).toHaveBeenCalledWith('telegram.success.2fa');
-  //       expect(t).not.toHaveBeenCalledWith('telegram.errors.2fa', expect.anything()); // Catch внутрішньої помилки не викликався
-
-  //      // Відновлюємо original process.env.PASSWORD
-  //      process.env.PASSWORD = originalPassword;
-  //      expect(consoleErrorSpy).not.toHaveBeenCalled(); // Лог помилки відсутій при успіху 2FA
-  //    });
-
-  //   test('повинен повернути 422, якщо відсутні необхідні дані для signIn', async () => {
-  //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash }; // Відсутній code
-  //     // User.findById налаштований на успіх (з номером телефону)
-  //     // getClientSpy налаштований на повернення mockClientInstance
+  //     const mockSrpData = { A: mockSrpA, M1: mockSrpM1 };
+  //     prepareSRP.mockResolvedValue(mockSrpData);
+  //     const mockAuthResult = { className: "auth.Authorization", user: { id: 'telegramUserId123_2fa' } };
+  //     Api.auth.CheckPassword.mockImplementation((args) => args);
+  //     mockClientInstance.invoke.mockResolvedValueOnce(mockAuthResult);
+  //     const originalPassword = process.env.PASSWORD;
+  //     process.env.PASSWORD = mockPassword;
 
   //     await telegramController.signIn(mockReq, mockRes);
 
   //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
   //     expect(getClientSpy).toHaveBeenCalledTimes(1);
-  //     expect(Api.auth.SignIn).not.toHaveBeenCalled(); // SignIn не викликається
-  //     expect(mockClientInstance.invoke).not.toHaveBeenCalled(); // invoke не викликається
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
+  //     expect(Api.account.GetPassword).toHaveBeenCalledTimes(1);
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.account.GetPassword));
+  //     expect(prepareSRP).toHaveBeenCalledWith(mockPasswordInfo, mockPassword);
+  //     expect(Api.auth.CheckPassword).toHaveBeenCalledWith({
+  //       password: expect.any(Api.InputCheckPasswordSRP)
+  //     });
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.CheckPassword));
+  //     expect(saveSessionSpy).toHaveBeenCalledWith(mockUserId);
+  //     expect(sendAndHandleMessages).not.toHaveBeenCalled();
+  //     expect(mockRes.status).toHaveBeenCalledWith(200);
+  //     expect(mockRes.json).toHaveBeenCalledWith({ message: t('telegram.success.2fa'), user: mockAuthResult.user });
+  //     expect(t).toHaveBeenCalledWith('telegram.success.2fa');
+  //     expect(t).not.toHaveBeenCalledWith('telegram.errors.2fa', expect.anything());
+  //     process.env.PASSWORD = originalPassword;
+  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  //   });
+
+  //   test('should return 422 if the required data for signIn is missing', async () => {
+  //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash };
+
+  //     await telegramController.signIn(mockReq, mockRes);
+
+  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
+  //     expect(getClientSpy).toHaveBeenCalledTimes(1);
+  //     expect(Api.auth.SignIn).not.toHaveBeenCalled();
+  //     expect(mockClientInstance.invoke).not.toHaveBeenCalled();
   //     expect(saveSessionSpy).not.toHaveBeenCalled();
   //     expect(sendAndHandleMessages).not.toHaveBeenCalled();
 
   //     expect(mockRes.status).toHaveBeenCalledWith(422);
-  //      // Перевіряємо JSON відповідь з деталями відсутніх полів
   //     expect(mockRes.json).toHaveBeenCalledWith({
-  //         error: t('errors.missing_data'),
-  //         details: {
-  //             phoneNumber: t('present'),
-  //             phoneCodeHash: t('present'),
-  //             code: t('missing'), // code відсутній
-  //         },
-  //         authorized: false,
+  //       error: t('errors.missing_data'),
+  //       details: {
+  //           phoneNumber: t('present'),
+  //           phoneCodeHash: t('present'),
+  //           code: t('missing'),
+  //       },
+  //       authorized: false,
   //     });
-  //      // Перевіряємо виклики t() для повідомлення про помилку та деталей
   //     expect(t).toHaveBeenCalledWith('errors.missing_data');
-  //     expect(t).toHaveBeenCalledWith('present'); // Для phoneNumber, phoneCodeHash
-  //     expect(t).toHaveBeenCalledWith('missing'); // Для code
+  //     expect(t).toHaveBeenCalledWith('present');
+  //     expect(t).toHaveBeenCalledWith('missing');
   //     expect(consoleErrorSpy).not.toHaveBeenCalled();
   //   });
 
-  //    test('повинен повернути 401, якщо signIn помилка не SESSION_PASSWORD_NEEDED', async () => {
-  //      mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
-  //      // User.findById налаштований на успіх (з номером телефону)
-  //      // getClientSpy налаштований на повернення mockClientInstance
-  //       // Мокуємо invoke для SignIn, щоб він відхилив обіцянку з іншою помилкою
-  //      const signInError = new Error('PHONE_CODE_INVALID');
-  //      signInError.errorMessage = 'PHONE_CODE_INVALID'; // Інше повідомлення про помилку
-  //      mockClientInstance.invoke.mockRejectedValueOnce(signInError); // Перший виклик (SignIn) падає
+  //   test('should return 401 if signIn error is not SESSION_PASSWORD_NEEDED', async () => {
+  //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
+  //     const signInError = new Error('PHONE_CODE_INVALID');
+  //     signInError.errorMessage = 'PHONE_CODE_INVALID';
+  //     mockClientInstance.invoke.mockRejectedValueOnce(signInError);
 
-  //      await telegramController.signIn(mockReq, mockRes);
+  //     await telegramController.signIn(mockReq, mockRes);
 
-  //      expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //      expect(getClientSpy).toHaveBeenCalledTimes(1);
-  //      expect(Api.auth.SignIn).toHaveBeenCalledWith(expect.any(Object));
-  //      expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
+  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
+  //     expect(getClientSpy).toHaveBeenCalledTimes(1);
+  //     expect(Api.auth.SignIn).toHaveBeenCalledWith(expect.any(Object));
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
 
-  //      expect(saveSessionSpy).not.toHaveBeenCalled();
-  //      expect(sendAndHandleMessages).not.toHaveBeenCalled();
-  //      expect(Api.account.GetPassword).not.toHaveBeenCalled(); // 2FA потік не запускається
+  //     expect(saveSessionSpy).not.toHaveBeenCalled();
+  //     expect(sendAndHandleMessages).not.toHaveBeenCalled();
+  //     expect(Api.account.GetPassword).not.toHaveBeenCalled();
 
-  //      expect(mockRes.status).toHaveBeenCalledWith(401); // Очікуємо 401
-  //      expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.sign_in'), authorized: false });
-  //      expect(t).toHaveBeenCalledWith('telegram.errors.sign_in');
-  //      // Перевіряємо логування помилки (контролер логує result в гілці else 401)
-  //      // expect(consoleErrorSpy).toHaveBeenCalledWith('Error:', expect.any(Object)); // Лог в else гілці
-  //       // Або якщо помилка кидається, лог з catch блоку
-  //       expect(consoleErrorSpy).not.toHaveBeenCalled(); // Припускаємо, що лог в else гілці
-  //    });
+  //     expect(mockRes.status).toHaveBeenCalledWith(401);
+  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.sign_in'), authorized: false });
+  //     expect(t).toHaveBeenCalledWith('telegram.errors.sign_in');
+  //     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  //   });
 
-  //    test('повинен повернути 422 при помилці внутрішнього 2FA потоку', async () => {
-  //       mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
-  //       // User.findById налаштований на успіх
-  //       // getClientSpy налаштований на повернення mockClientInstance
-  //        // Мокуємо invoke для SignIn, щоб він відхилив обіцянку з SESSION_PASSWORD_NEEDED
-  //       const passwordNeededError = new Error('SESSION_PASSWORD_NEEDED');
-  //       passwordNeededError.errorMessage = 'SESSION_PASSWORD_NEEDED';
-  //       mockClientInstance.invoke.mockRejectedValueOnce(passwordNeededError);
+  //   test('should return 422 on internal 2FA flow error', async () => {
+  //     mockReq.body = { phoneCodeHash: mockPhoneCodeHash, code: mockCode };
+  //     const passwordNeededError = new Error('SESSION_PASSWORD_NEEDED');
+  //     passwordNeededError.errorMessage = 'SESSION_PASSWORD_NEEDED';
+  //     mockClientInstance.invoke.mockRejectedValueOnce(passwordNeededError);
+  //     const getPasswordError = new Error('Telegram GetPassword API error');
+  //     mockClientInstance.invoke.mockRejectedValueOnce(getPasswordError);
 
-  //        // Налаштовуємо моки для 2FA потоку - симулюємо помилку на одному з кроків
-  //        // Мокуємо invoke для GetPassword, щоб він відхилив обіцянку
-  //       const getPasswordError = new Error('Telegram GetPassword API error');
-  //       mockClientInstance.invoke.mockRejectedValueOnce(getPasswordError); // Другий виклик (GetPassword) падає
+  //     await telegramController.signIn(mockReq, mockRes);
 
-  //       await telegramController.signIn(mockReq, mockRes);
+  //     expect(User.findById).toHaveBeenCalledWith(mockUserId);
+  //     expect(getClientSpy).toHaveBeenCalledTimes(1);
+  //     expect(Api.auth.SignIn).toHaveBeenCalledWith(expect.any(Object));
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn));
 
-  //       expect(User.findById).toHaveBeenCalledWith(mockUserId);
-  //       expect(getClientSpy).toHaveBeenCalledTimes(1);
-  //       expect(Api.auth.SignIn).toHaveBeenCalledWith(expect.any(Object));
-  //       expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.auth.SignIn)); // Перший invoke
+  //     expect(Api.account.GetPassword).toHaveBeenCalledTimes(1);
+  //     expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.account.GetPassword));
 
-  //       // Перевіряємо, що 2FA потік почався
-  //       expect(Api.account.GetPassword).toHaveBeenCalledTimes(1);
-  //       expect(mockClientInstance.invoke).toHaveBeenCalledWith(expect.any(Api.account.GetPassword)); // Другий invoke і він падає
+  //     expect(prepareSRP).not.toHaveBeenCalled();
+  //     expect(Api.auth.CheckPassword).not.toHaveBeenCalled();
+  //     expect(saveSessionSpy).not.toHaveBeenCalled();
+  //     expect(sendAndHandleMessages).not.toHaveBeenCalled();
 
-  //       expect(prepareSRP).not.toHaveBeenCalled(); // Подальші кроки 2FA не викликаються
-  //       expect(Api.auth.CheckPassword).not.toHaveBeenCalled();
-  //       expect(saveSessionSpy).not.toHaveBeenCalled();
-  //       expect(sendAndHandleMessages).not.toHaveBeenCalled();
-
-  //       expect(mockRes.status).toHaveBeenCalledWith(422); // Очікуємо 422
-  //       // Перевіряємо JSON відповідь та логування з внутрішнього catch блоку
-  //       expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.2fa', {error: getPasswordError}) });
-  //       expect(t).toHaveBeenCalledWith('telegram.errors.2fa', {error: getPasswordError});
-  //       expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.2fa', {error: getPasswordError}), getPasswordError); // Лог внутрішньої помилки
-  //    });
-
-  //     // Можна додати більше тестів для помилок 2FA (prepareSRP помилка, CheckPassword помилка)
+  //     expect(mockRes.status).toHaveBeenCalledWith(422);
+  //     expect(mockRes.json).toHaveBeenCalledWith({ error: t('telegram.errors.2fa', {error: getPasswordError}) });
+  //     expect(t).toHaveBeenCalledWith('telegram.errors.2fa', {error: getPasswordError});
+  //     expect(consoleErrorSpy).toHaveBeenCalledWith(t('telegram.errors.2fa', {error: getPasswordError}), getPasswordError); // Лог внутрішньої помилки
+  //   });
   // });
 
   // describe('checkSession', () => {

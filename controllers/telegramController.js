@@ -11,6 +11,25 @@ import { t } from '../i18n.js';
 
 let client;
 
+async function getClient() {
+  try {
+    const isAuthorized = await client?.isUserAuthorized();
+    const admin = await User.findOne({ role: 'admin' });
+
+    if (isAuthorized){
+      return client;
+    } else if (await initializeClient(admin._id)) {
+      return client;
+    } else {
+      return null;
+    };
+
+  } catch (error) {
+    console.error(t('errors.client', {error: error}));
+    return null;
+  }
+}
+
 async function show(req, res) {
   try {
     const user = await User.findById(req.user._id);
@@ -232,6 +251,10 @@ async function sendCode(req, res) {
 async function signIn(req, res) { // To-do: fix this function when sms code send seccessfully
   try {
     const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: t('user.errors.user_not_found') });
+    };
+
     const phoneNumber = user.phoneNumber;
     const { phoneCodeHash, code } = req.body;
 
@@ -247,12 +270,13 @@ async function signIn(req, res) { // To-do: fix this function when sms code send
       });
     };
 
+    client = await getClient(); 
     const result = await client.invoke(
       new Api.auth.SignIn({ phoneNumber, phoneCodeHash, phoneCode: code })
     );
 
     if (result.className === "auth.Authorization" && result.user) {
-      saveSession(user._id);
+      await saveSession(user._id);
       await sendAndHandleMessages(client, INFO_CHANEL_NAME, t('handle_message'), t('handle_message'), user);
 
       return res.status(200).json({ message: t('telegram.success.sign_in'), user: result.user, authorized: true });
@@ -276,7 +300,7 @@ async function signIn(req, res) { // To-do: fix this function when sms code send
           })
         );
 
-        saveSession(user._id);
+        await saveSession(user._id);
 
         res.status(200).json({ message: t('telegram.success.2fa'), user: authResult.user });
       } catch (innerError) {
@@ -284,6 +308,7 @@ async function signIn(req, res) { // To-do: fix this function when sms code send
         res.status(422).json({ error: t('telegram.errors.2fa', {error: innerError}) });
       }
     } else {
+      console.error(t('telegram.errors.sign_in'), error);
       res.status(422).json({ error: t('telegram.errors.sign_in') });
     }
   }
@@ -307,25 +332,6 @@ async function checkSession(req, res) {
     res.status(422).json({ error: t('telegram.errors.checking_session', {error: error}) });
   }
 };
-
-async function getClient() {
-  try {
-    const isAuthorized = await client?.isUserAuthorized();
-    const admin = await User.findOne({ role: 'admin' });
-
-    if (isAuthorized){
-      return client;
-    } else if (await initializeClient(admin._id)) {
-      return client;
-    } else {
-      return null;
-    };
-
-  } catch (error) {
-    console.error(t('errors.client', {error: error}));
-    return null;
-  }
-}
 
 async function joinChannel(channelName) {
   try {
@@ -361,14 +367,14 @@ async function checkSubscription(channelName) {
       new Api.channels.GetParticipant({
         channel: channelName,
         participant: username,
-        })
+      })
     );
 
       return true;
   } catch (error) {
-      console.error(t('telegram.errors.subscribe_channel', {error: error}));
-      return false;
+    console.error(t('telegram.errors.subscribe_channel', {error: error}));
+    return false;
   }
 }
 
-export { initializeClient, sendCode, signIn, checkSession, getClient, show, create, update, remove, joinChannel, checkSubscription };
+export { initializeClient, sendCode, signIn, checkSession, getClient, show, create, update, remove, joinChannel, checkSubscription, saveSession };
