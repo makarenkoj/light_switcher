@@ -105,7 +105,6 @@ async function update(req, res) {
     if (apiHash) updateFields.apiHash = apiHash;
 
     if (Object.keys(updateFields).length === 0) {
-      console.log('updateFields:', updateFields);
       return res.status(422).json({ error: t('telegram.errors.nothing_to_update') });
     };
 
