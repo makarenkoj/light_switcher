@@ -77,6 +77,7 @@ import usersRoutes from './routes/users.js';
 import deviceRoutes from './routes/device.js';
 import triggerRoutes from './routes/trigger.js';
 import adminRoutes from './routes/admin.js';
+import indicatorsRoutes from './routes/indicators.js';
 // import deviceTriggerRoutes from './routes/deviceTrigger.js';
 
 // Використання маршрутів
@@ -92,6 +93,7 @@ app.use('/api/auth', authRoutes); // маршрути для реєстраці�
 app.use('/api/users', usersRoutes); 
 app.use('/api/devices', deviceRoutes); // маршрути для керування пристроєм
 app.use('/api/triggers', triggerRoutes);
+app.use('/api/indicators', indicatorsRoutes); // маршрути для керування індикаторами
 
 // Налаштування WebSocket-з'єднань
 io.on('connection', (socket) => {
