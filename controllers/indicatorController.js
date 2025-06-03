@@ -75,7 +75,15 @@ async function update(req, res) {
     const { status, triggerId } = req.body;
     const updateFields = {};
     if (typeof status === 'boolean') updateFields.status = status;
-    if (triggerId) updateFields.triggerId = triggerId;
+
+    if (triggerId) {
+      const trigger = await Triggers.findById(triggerId);
+      if (!trigger) {
+        return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
+      };
+      updateFields.trigger = trigger;
+    };
+
     if (Object.keys(updateFields).length === 0) {
       return res.status(400).json({ error: t('indicator.errors.nothing_to_update') });
     };
@@ -86,7 +94,7 @@ async function update(req, res) {
     };
 
     const updated = await Indicators.findByIdAndUpdate(indicator._id, updateFields, { new: true }).populate('user', '-password').populate('trigger');
-    res.status(200).json({ message: t('indicator.seccess.updated'), indicator: updated });
+    res.status(200).json({ message: t('indicator.success.updated'), indicator: updated });
   } catch (error) {
     console.error(t('indicator.errors.update', {error: error.message}));
     res.status(422).json({ error: t('indicator.errors.update', {error: error.message}) });

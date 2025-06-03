@@ -151,7 +151,7 @@ export async function getFilteredTriggers(req, res) {
 
         const triggers = await Triggers.find({ _id: { $nin: linkedTriggers }, userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
-        res.status(200).json({ message: t('trigger..success.fetched'), triggers });
+        res.status(200).json({ message: t('trigger.success.fetched'), triggers });
     } catch (error) {
         console.error(t('trigger.errorsfetching', {error: error}));
         res.status(422).json({ error: t('trigger.errorsfetching', {error: error}) });
