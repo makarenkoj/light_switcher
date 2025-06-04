@@ -57,7 +57,12 @@ async function create(req, res) {
       return res.status(404).json({ error: t('trigger.errors.trigger_not_found') });
     }
 
-    const indicator = new Indicators({ ...req.body, status: trigger.status, user: user, trigger: trigger });
+    const type = req.body.type;
+    if (!['alarm', 'power'].includes(type)) {
+      return res.status(400).json({ error: t('indicator.errors.invalid_type') });
+    }
+
+    const indicator = new Indicators({ type, status: trigger.status, user: user, trigger: trigger });
     await indicator.save();
     res.status(201).json({ message: t('indicator.success.created'), indicator });
   } catch (error) {

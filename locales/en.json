@@ -164,7 +164,8 @@
       "indicator_not_created": "Indicator not created!",
       "indicator_not_updated": "Indicator not updated!",
       "indicator_not_deleted": "Indicator not deleted!",
-      "indicators": "Indicators error: {{error}}"
+      "indicators": "Indicators error: {{error}}",
+      "invalid_type": "Invalid Indicator Type"
     },
     "success": {
       "deleted": "Indicator deleted!",

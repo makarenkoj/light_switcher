@@ -162,7 +162,8 @@
       "indicator_not_created": "Індикатор не створено!",
       "indicator_not_updated": "Індикатор не оновлено!",
       "indicator_not_deleted": "Індикатор не видалено!",
-      "indicators": "Помилка індикаторів: {{error}}"
+      "indicators": "Помилка індикаторів: {{error}}",
+      "invalid_type": "Недійсний тип індикатора"
     },
     "success": {
       "deleted": "Індикатор видалено!",
