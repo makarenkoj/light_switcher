@@ -99,6 +99,7 @@ async function update(req, res) {
     };
 
     const updated = await Indicators.findByIdAndUpdate(indicator._id, updateFields, { new: true }).populate('user', '-password').populate('trigger');
+    io.emit('indicatorNotification', { message: t('indicator.success.updated'), indicator });
     res.status(200).json({ message: t('indicator.success.updated'), indicator: updated });
   } catch (error) {
     console.error(t('indicator.errors.update', {error: error.message}));
