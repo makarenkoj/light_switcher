@@ -1,4 +1,4 @@
-import { controlDevice, statusDevice } from '../utils/deviceUtils.js';
+import { statusDevice, changeDeviceStatus } from '../utils/deviceUtils.js';
 import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
@@ -57,8 +57,8 @@ async function index(req, res) {
                           devices
     });
   } catch (error) {
-    console.error(t('device.erors.device_not_found'), error);
-    res.status(422).json({ error: t('device.erors.device_not_found') });
+    console.error(t('device.errors.device_not_found'), error);
+    res.status(422).json({ error: t('device.errors.device_not_found') });
   }
 }
 
@@ -209,13 +209,27 @@ async function changeStatus(req, res) {
     };
 
     const { status } = req.body;
-    const deviceData = await controlDevice(device._id, status, device.deviceId, device.accessId, device.secretKey);
+    if (typeof status === 'undefined') {
+      console.error(t('device.errors.status_required'));
+      return res.status(400).json({ error: t('device.errors.status_required') });
+    };
+
+    const deviceData = await changeDeviceStatus(device._id, status);
+    console.log('Device Data:', deviceData);
+    const msg = deviceData.msg;
+    const success = deviceData.success;
+
+    if (!success) {
+      console.error(t('device.errors.status_change_failed', {error: msg}));
+      return res.status(422).json({ error: t('device.errors.status_change_failed', {error: msg}) });
+    };
 
     await device.updateOne({ status });
 
     res.status(200).json({ message: t('device.success.device_is', {status: status ? t('device.success.on') : t('device.success.off')}), body: deviceData });
   }
   catch (error) {
+    console.log(error);
     res.status(422).json({ error: error.message });
   }
 }
@@ -225,7 +239,7 @@ async function triggers(req, res) {
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).json({ error: t('user.errors.user_not_found') });
-        }
+        };
 
         let { page = 1, limit = 9 } = req.query;
         page = parseInt(page);
@@ -235,7 +249,11 @@ async function triggers(req, res) {
         const device = await Devices.findById(req.params.id);
         if (!device) {
           return res.status(404).json({ error: t('device.errors.device_not_found') });
-        }
+        };
+
+        if (device.userId.toString() !== user._id.toString()) {
+          return res.status(403).json({ error: t('device.errors.authorize') });
+        };
 
         const devicesTriggers = await DevicesTriggers.find({deviceId: device._id }).sort({ createdAt: -1 });
         if (!devicesTriggers) {

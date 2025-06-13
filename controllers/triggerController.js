@@ -4,6 +4,7 @@ import Devices from '../models/devicesModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
 import { getClient, joinChannel } from './telegramController.js'
 import { t } from '../i18n.js';
+import { changeIndicatorStatus } from '../modules/indicatorModules.js';
 
 export async function show(req, res) {
     try {
@@ -97,6 +98,7 @@ export async function update(req, res) {
         Object.assign(trigger, req.body);
         await trigger.save();
         res.json(trigger);
+        await changeIndicatorStatus(trigger._id);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -151,7 +153,7 @@ export async function getFilteredTriggers(req, res) {
 
         const triggers = await Triggers.find({ _id: { $nin: linkedTriggers }, userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
 
-        res.status(200).json({ message: t('trigger..success.fetched'), triggers });
+        res.status(200).json({ message: t('trigger.success.fetched'), triggers });
     } catch (error) {
         console.error(t('trigger.errorsfetching', {error: error}));
         res.status(422).json({ error: t('trigger.errorsfetching', {error: error}) });
