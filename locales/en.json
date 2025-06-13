@@ -93,7 +93,8 @@
       "dt_not_found": "Device trigger not found!",
       "authorize": "You do not have permission to perform actions with this device!",
       "id_required": "Device ID required!",
-      "id_exists": "A device with this ID already exists!"
+      "id_exists": "A device with this ID already exists!",
+      "status_change_failed": "Failed to change device status: {{error}}"
     },
     "success": {
       "deleted": "Device deleted!",
@@ -149,6 +150,29 @@
       "2fa": "2FA Sign-in successfully",
       "authorized": "Telegram authorized!",
       "join_channel": "Telegram joined the channel successfully {{channelName}}"
+    }
+  },
+  "indicator": {
+    "errors": {
+      "delete": "Failed to delete indicator: {{error}}",
+      "update": "Failed to update indicator: {{error}}",
+      "create": "Failed to create indicator: {{error}}",
+      "exists": "Failed, indicator already exists!",
+      "nothing_to_update": "Nothing to update!",
+      "retrieve": "Failed to retrieve indicator: {{error}}",
+      "not_found": "Indicator not found!",
+      "indicator_not_created": "Indicator not created!",
+      "indicator_not_updated": "Indicator not updated!",
+      "indicator_not_deleted": "Indicator not deleted!",
+      "indicators": "Indicators error: {{error}}",
+      "invalid_type": "Invalid Indicator Type"
+    },
+    "success": {
+      "deleted": "Indicator deleted!",
+      "retrieved": "Indicator retrieved successfully",
+      "created": "Indicator created!",
+      "updated": "Indicator updated!",
+      "not_found": "You don't have any indicators yet!"
     }
   },
   "errors": {

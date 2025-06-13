@@ -1,4 +1,4 @@
-import { controlDevice, statusDevice } from '../utils/deviceUtils.js';
+import { statusDevice, changeDeviceStatus } from '../utils/deviceUtils.js';
 import Devices from '../models/devicesModel.js';
 import User from '../models/userModel.js';
 import DevicesTriggers from '../models/devicesTriggersModel.js';
@@ -214,13 +214,22 @@ async function changeStatus(req, res) {
       return res.status(400).json({ error: t('device.errors.status_required') });
     };
 
-    const deviceData = await controlDevice(device._id, status, device.deviceId, device.accessId, device.secretKey);
+    const deviceData = await changeDeviceStatus(device._id, status);
+    console.log('Device Data:', deviceData);
+    const msg = deviceData.msg;
+    const success = deviceData.success;
+
+    if (!success) {
+      console.error(t('device.errors.status_change_failed', {error: msg}));
+      return res.status(422).json({ error: t('device.errors.status_change_failed', {error: msg}) });
+    };
 
     await device.updateOne({ status });
 
     res.status(200).json({ message: t('device.success.device_is', {status: status ? t('device.success.on') : t('device.success.off')}), body: deviceData });
   }
   catch (error) {
+    console.log(error);
     res.status(422).json({ error: error.message });
   }
 }

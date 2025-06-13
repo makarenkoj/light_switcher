@@ -1,6 +1,7 @@
 import User from '../models/userModel.js';
 import Devices from '../models/devicesModel.js';
 import Session from '../models/sessionModel.js';
+import Triggers from '../models/triggersModel.js';
 import { t } from '../i18n.js';
 import { io } from '../app.js';
 
@@ -64,4 +65,24 @@ async function remove(req, res) {
   }
 };
 
-export { show, update, remove };
+async function getTriggers(req, res) {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.sttus(404).json({ error: t('user.errors.user_not_found') });
+        }
+
+        let { page = 1, limit = 9 } = req.query;
+        page = parseInt(page);
+        limit = parseInt(limit);
+        const skip = (page - 1) * limit;
+
+        const triggers = await Triggers.find({ userId: user._id }).sort({ createdAt: -1 }).skip(skip).limit(limit);
+        res.status(200).json({ message: t('trigger..success.fetched'), triggers });
+    } catch (error) {
+        console.error(t('trigger.errors.retrieve_failed', {error: error}));
+        throw new Error(t('trigger.errors.retrieve_failed', {error: error.message}));
+    }
+}
+
+export { show, update, remove, getTriggers };

@@ -52,72 +52,79 @@ async function controlDevice(triggerId) {
 
 // send API request to change device status
 async function changeDeviceStatus(deviceId, status) {
-  // add device 
   const device = await Devices.findById(deviceId);
 
   if (!device) {
     return { error: 'Device not found!' };
   };
-  await device.updateOne({ status });
 
-  io.emit("deviceStatusUpdate", { deviceId, status });
+  const statusData = await statusDevice(device.id);
+  console.log("Device status data:", statusData);
+  const statusMsg = statusData.msg;
+  const statusSuccess = statusData.success;
 
-  return status;
+  if (!statusSuccess) {
+    console.error("Failed to get device status:", statusMsg);
+    return statusData;
+  };
 
-// mock device
-// const accessId = device.accessId;
-// const secretKey = device.secretKey;
-  // const t = Date.now().toString();
-  // const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
-  // const signature = signHMAC(message, secretKey).toUpperCase();
-  // const url = "https://openapi.tuyaeu.com/v1.0/token?grant_type=1";
-  // const headers = {
-  //     "client_id": accessId,
-  //     "sign": signature,
-  //     "t": t,
-  //     "sign_method": signMethod
-  // };
+  // To-do add inspect success statusData
 
-  // try {
-  //     const tokenResponse = await fetch(url, { method: "GET", headers });
-  //     const tokenData = await tokenResponse.json();
+  const accessId = device.accessId;
+  const secretKey = device.secretKey;
+  const t = Date.now().toString();
+  const message = accessId + t + "GET\n" + "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\n\n" + "/v1.0/token?grant_type=1";
+  const signature = signHMAC(message, secretKey).toUpperCase();
+  const url = "https://openapi.tuyaeu.com/v1.0/token?grant_type=1";
+  const headers = {
+      "client_id": accessId,
+      "sign": signature,
+      "t": t,
+      "sign_method": signMethod
+  };
 
-  //     if (!tokenData.result || !tokenData.result.access_token) {
-  //         throw new Error("Failed to get access token.");
-  //     };
+  try {
+    const tokenResponse = await fetch(url, { method: "GET", headers });
+    const tokenData = await tokenResponse.json();
 
-  //     const accessToken = tokenData.result.access_token;
+    if (!tokenData.result || !tokenData.result.access_token) {
+        throw new Error("Failed to get access token.");
+    };
 
-  //     // Step 2: Device control request
-  //     const body = {"commands": [{ "code": "switch_1", "value": status }]};
-  //     const bodyHash = sha256(JSON.stringify(body));
-  //     const controlMessage = `${accessId}${accessToken}${t}POST\n${bodyHash}\n\n/v1.0/devices/${deviceId}/commands`;
-  //     const controlSignature = signHMAC(controlMessage, secretKey).toUpperCase();
-  //     const controlUrl = `https://openapi.tuyaeu.com/v1.0/devices/${deviceId}/commands`;
+    const accessToken = tokenData.result.access_token;
 
-  //     const controlHeaders = {
-  //         "client_id": accessId,
-  //         "access_token": accessToken,
-  //         "sign": controlSignature,
-  //         "t": t,
-  //         "sign_method": signMethod,
-  //         "Content-Type": "application/json"
-  //     };
+    // Step 2: Device control request
+    const body = {"commands": [{ "code": "switch_1", "value": status }]};
+    const bodyHash = sha256(JSON.stringify(body));
+    const controlMessage = `${accessId}${accessToken}${t}POST\n${bodyHash}\n\n/v1.0/devices/${deviceId}/commands`;
+    const controlSignature = signHMAC(controlMessage, secretKey).toUpperCase();
+    const controlUrl = `https://openapi.tuyaeu.com/v1.0/devices/${deviceId}/commands`;
 
-  //     const controlResponse = await fetch(controlUrl, {
-  //         method: "POST",
-  //         headers: controlHeaders,
-  //         body: JSON.stringify(body)
-  //     });
+    const controlHeaders = {
+        "client_id": accessId,
+        "access_token": accessToken,
+        "sign": controlSignature,
+        "t": t,
+        "sign_method": signMethod,
+        "Content-Type": "application/json"
+    };
 
-  //     const controlData = await controlResponse.json();
-  //     console.log("Device control response:", controlData);
-  //     return controlData;
+    const controlResponse = await fetch(controlUrl, {
+        method: "POST",
+        headers: controlHeaders,
+        body: JSON.stringify(body)
+    });
 
-  // } catch (error) {
-  //     console.error("Error during device control:", error);
-  // }
-  // mock device response
+    const controlData = await controlResponse.json();
+
+    if (controlData.success) {
+      io.emit("deviceStatusUpdate", { deviceId: device._id, status });
+    };
+
+    return controlData;
+  } catch (error) {
+      console.error("Error during device control:", error);
+  }
 };
 
 // get device status with API request
@@ -175,5 +182,5 @@ async function statusDevice(deviceId) {
   }
 };
 
-export { controlDevice, statusDevice };
+export { controlDevice, statusDevice, changeDeviceStatus };
 
